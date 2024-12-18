@@ -105,5 +105,7 @@
 		text += "Metabolite "
 	if(category & PROPERTY_TYPE_ANOMALOUS)
 		text += "Anomalous "
+	if(category & PROPERTY_TYPE_BOTANICAL)
+		text += "Botanical "
 	return text
 

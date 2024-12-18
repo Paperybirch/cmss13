@@ -3,6 +3,21 @@
 	category = PROPERTY_TYPE_IRRITANT
 	value = -1
 
+/datum/chem_property/neutral/YieldAmp
+	name = PROPERTY_YIELDAMP
+	code = "BYA"
+	description = "The chemical is passively metabolized with no other effects in temperatures above 170 kelvin. Below however, the chemical will metabolize with increased effect."
+	rarity = PROPERTY_COMMON
+	category = PROPERTY_TYPE_BOTANICAL
+	value = 1
+
+
+
+
+
+
+
+
 /datum/chem_property/neutral/cryometabolizing
 	name = PROPERTY_CRYOMETABOLIZING
 	code = "CMB"

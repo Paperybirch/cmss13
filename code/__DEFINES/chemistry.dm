@@ -116,6 +116,13 @@
 /*
 	properties defines
 */
+//Botanicals
+#define PROPERTY_YIELDAMP "YieldAmp"
+#define PROPERTY_PLANTAID "PlantHeal"
+#define PROPERTY_PLANTHARM "PlantKill"
+#define PROPERTY_PLANTMUT "PlantMut"
+#define PROPERTY_PLANTMUTSTOP "PlantStabilizer"
+
 //Negative
 #define PROPERTY_HYPOXEMIC "hypoxemic"
 #define PROPERTY_TOXIC "toxic"
@@ -253,6 +260,7 @@
 #define PROPERTY_TYPE_UNADJUSTABLE 128
 #define PROPERTY_TYPE_CATALYST 256
 #define PROPERTY_TYPE_COMBUSTIBLE 512
+#define PROPERTY_TYPE_BOTANICAL 1
 
 // Defines for pain applied pr tick by chems
 #define PROPERTY_PAINING_PAIN 0.5

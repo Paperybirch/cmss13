@@ -47,6 +47,11 @@
 
 	// Reagent information for process(), consider moving this to a controller along
 	// with cycle information under 'mechanical concerns' at some point.
+
+	var/global/list/botanical_properties = list(
+		"PROPERTY_YIELDAMP"
+	)
+
 	var/global/list/toxic_reagents = list(
 		"anti_toxin" =  -2,
 		"arithrazine" = -1.5,
@@ -289,6 +294,7 @@
 
 		if(seed && !dead)
 			//Handle some general level adjustments.
+
 			if(toxic_reagents[R.id])
 				toxins += toxic_reagents[R.id]  * reagent_total
 			if(weedkiller_reagents[R.id])
@@ -297,10 +303,22 @@
 				pestlevel += pestkiller_reagents[R.id] * reagent_total
 
 			// Beneficial reagents have a few impacts along with health buffs.
-			if(beneficial_reagents[R.id])
-				plant_health += beneficial_reagents[R.id][1]    * reagent_total
-				yield_mod += beneficial_reagents[R.id][2] * reagent_total
-				mutation_mod += beneficial_reagents[R.id][3] * reagent_total
+			//modifying here to allow for chem traits to replace beneficail_reagents list
+			for(var/datum/chem_property/P in properties)
+				if (P =="PROPERTY_YIELDAMP")
+					yield_mod += P.level* reagent_total
+				if (P =="PROPERTY_PLANTAID")
+					plant_health += P.level *.1 *reagent_total
+				if (P =="PROPERTY_PLANTHARM")
+					plant_health +- P.level *-0.1* reagent_total
+				if (P == "PROPERTY_PLANTMUT")
+					mutation_mod += P.level *2.5* reagent_total
+				if (P== "PROPERTY_PLANTMUTSTOP")
+					mutation_mod += P.level *-4 *reagent_total
+			//if(beneficial_reagents[R.id])
+			//	plant_health += beneficial_reagents[R.id][1]    * reagent_total
+			//	yield_mod += beneficial_reagents[R.id][2] * reagent_total
+			//	mutation_mod += beneficial_reagents[R.id][3] * reagent_total
 
 			// Mutagen is distinct from the previous types and mostly has a chance of proccing a mutation.
 			if(mutagenic_reagents[R.id])
