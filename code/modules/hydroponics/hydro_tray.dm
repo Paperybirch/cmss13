@@ -291,7 +291,7 @@
 	for(var/datum/reagent/R in temp_chem_holder.reagents.reagent_list)
 
 		var/reagent_total = temp_chem_holder.reagents.get_reagent_amount(R.id)
-
+		var/list/prop_list_test = R.properties
 		if(seed && !dead)
 			//Handle some general level adjustments.
 
@@ -304,17 +304,17 @@
 
 			// Beneficial reagents have a few impacts along with health buffs.
 			//modifying here to allow for chem traits to replace beneficail_reagents list
-			for(var/datum/chem_property/P in properties)
+			for(var/datum/chem_property/P in prop_list_test)
 				if (P =="PROPERTY_YIELDAMP")
 					yield_mod += P.level* reagent_total
 				if (P =="PROPERTY_PLANTAID")
-					plant_health += P.level *.1 *reagent_total
+					plant_health += P.level*reagent_total
 				if (P =="PROPERTY_PLANTHARM")
-					plant_health +- P.level *-0.1* reagent_total
+					plant_health += P.level*reagent_total
 				if (P == "PROPERTY_PLANTMUT")
-					mutation_mod += P.level *2.5* reagent_total
+					mutation_mod += P.level*reagent_total
 				if (P== "PROPERTY_PLANTMUTSTOP")
-					mutation_mod += P.level *-4 *reagent_total
+					mutation_mod += P.level*reagent_total
 			//if(beneficial_reagents[R.id])
 			//	plant_health += beneficial_reagents[R.id][1]    * reagent_total
 			//	yield_mod += beneficial_reagents[R.id][2] * reagent_total
