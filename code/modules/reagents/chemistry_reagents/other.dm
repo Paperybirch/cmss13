@@ -380,7 +380,8 @@
 	reagent_state = SOLID
 	color = "#C7C7C7" // rgb: 199,199,199
 	chemclass = CHEM_CLASS_BASIC
-	properties = list(PROPERTY_CARCINOGENIC = 2, PROPERTY_HEMORRAGING = 1)
+	properties = list(PROPERTY_CARCINOGENIC = 1, PROPERTY_HEMORRAGING = 1)
+//changing carcinogenic 2->1, and changing Unstable Mutagen from 1->2 to allow for UM to be more mutagenic in botany
 
 /datum/reagent/thermite
 	name = "Thermite"

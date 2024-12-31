@@ -45,7 +45,8 @@
 	reagent_state = LIQUID
 	color = "#13BC5E" // rgb: 19, 188, 94
 	chemclass = CHEM_CLASS_UNCOMMON
-	properties = list(PROPERTY_CARCINOGENIC = 1)
+	properties = list(PROPERTY_CARCINOGENIC = 2)
+//changing carcinogenic 1->2, and changing Radium from 1->2 to allow for UM to be more mutagenic in botany
 
 /datum/reagent/toxin/phoron
 	name = "Phoron"

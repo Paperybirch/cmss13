@@ -305,16 +305,16 @@
 			// Beneficial reagents have a few impacts along with health buffs.
 			//modifying here to allow for chem traits to replace beneficail_reagents list
 			for(var/datum/chem_property/P in prop_list_test)
-				if (P =="PROPERTY_YIELDAMP")
-					yield_mod += P.level* reagent_total
-				if (P =="PROPERTY_PLANTAID")
-					plant_health += P.level*reagent_total
-				if (P =="PROPERTY_PLANTHARM")
-					plant_health += P.level*reagent_total
-				if (P == "PROPERTY_PLANTMUT")
-					mutation_mod += P.level*reagent_total
-				if (P== "PROPERTY_PLANTMUTSTOP")
-					mutation_mod += P.level*reagent_total
+				if (P =="PROPERTY_FLUFFING")
+					yield_mod += P.level*0.1*reagent_total
+				if (P =="PROPERTY_NEOGENETIC")
+					plant_health += P.level*0.1*reagent_total
+				if (P =="PROPERTY_TOXIC")
+					plant_health += P.level*-0.2*reagent_total
+				if (P == "PROPERTY_CARCINOGENIC")
+					mutation_mod += P.level*0.1*reagent_total
+				if (P== "PROPERTY_AIDING")
+					mutation_mod += P.level*-0.2*reagent_total
 			//if(beneficial_reagents[R.id])
 			//	plant_health += beneficial_reagents[R.id][1]    * reagent_total
 			//	yield_mod += beneficial_reagents[R.id][2] * reagent_total
