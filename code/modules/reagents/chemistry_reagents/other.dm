@@ -132,6 +132,20 @@
 		if(M.fire_stacks <= 0)
 			M.ExtinguishMob()
 
+/datum/reagent/water/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		var/water_added = 0
+		var/water_input = 1*volume
+		water_added += water_input
+		tray.waterlevel += water_input
+
+		tray.toxins -= floor(water_added/4)
+		tray.exception_check = TRUE
+
 /datum/reagent/water/holywater
 	name = "Holy Water"
 	id = "holywater"
@@ -200,8 +214,7 @@
 	id = "copper"
 	description = "Chemical element of atomic number 29. A solfe malleable red metal with high thermal and electrical conductivity."
 	color = "#6E3B08" // rgb: 110, 59, 8
-	chemfiresupp = TRUE
-	properties = list(PROPERTY_FLUFFING = 4) //MAKE SURE TO CHANGE TEST VALUE
+	chemfiresupp = TRUE	
 	burncolor = "#78be5a"
 	burncolormod = 4
 	chemclass = CHEM_CLASS_BASIC
@@ -291,6 +304,15 @@
 		else
 			dirtoverlay.alpha = min(dirtoverlay.alpha+volume*30, 255)
 
+/datum/reagent/carbon/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += -1*volume
+		tray.exception_check = TRUE
+
 /datum/reagent/chlorine
 	name = "Chlorine"
 	id = "chlorine"
@@ -302,6 +324,27 @@
 	chemclass = CHEM_CLASS_BASIC
 	properties = list(PROPERTY_BIOCIDIC = 1)
 
+/datum/reagent/chlorine/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += 1.5*volume
+		tray.weedlevel += -3*volume
+
+		tray.plant_health += -1*volume
+		tray.yield_mod += 0*volume
+		tray.mutation_mod += 0*volume
+
+		var/water_added = 0
+		var/water_input = -0.5*volume
+		water_added += water_input
+		tray.waterlevel += water_input
+
+		tray.toxins -= floor(water_added/4)
+		tray.exception_check = TRUE
+
 /datum/reagent/fluorine
 	name = "Fluorine"
 	id = "fluorine"
@@ -312,6 +355,27 @@
 	overdose_critical = REAGENTS_OVERDOSE_CRITICAL
 	chemclass = CHEM_CLASS_BASIC
 	properties = list(PROPERTY_TOXIC = 1, PROPERTY_NEUTRALIZING = 1)
+
+/datum/reagent/fluorine/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += 2.5*volume
+		tray.weedlevel += -4*volume
+
+		tray.plant_health += -2*volume
+		tray.yield_mod += 0*volume
+		tray.mutation_mod += 0*volume
+
+		var/water_added = 0
+		var/water_input = -0.5*volume
+		water_added += water_input
+		tray.waterlevel += water_input
+
+		tray.toxins -= floor(water_added/4)
+		tray.exception_check = TRUE
 
 /datum/reagent/sodium
 	name = "Sodium"
@@ -339,6 +403,28 @@
 
 	custom_metabolism = AMOUNT_PER_TIME(1, 200 SECONDS)
 
+/datum/reagent/phosphorus/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.weedlevel += -2*volume
+
+		tray.plant_health += -0.75*volume
+		tray.yield_mod += 0*volume
+		tray.mutation_mod += 0*volume
+
+		tray.nutrilevel += 0.1*volume
+
+		var/water_added = 0
+		var/water_input = -0.5*volume
+		water_added += water_input
+		tray.waterlevel += water_input
+
+		tray.toxins -= floor(water_added/4)
+		tray.exception_check = TRUE
+
 /datum/reagent/lithium
 	name = "Lithium"
 	id = "lithium"
@@ -364,6 +450,19 @@
 	properties = list(PROPERTY_NUTRITIOUS = 1)
 	flags = REAGENT_TYPE_MEDICAL
 
+/datum/reagent/sugar/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.weedlevel += 2*volume
+		tray.pestlevel += 2*volume
+
+		tray.nutrilevel += 0.1*volume
+
+		tray.exception_check = TRUE
+
 /datum/reagent/glycerol
 	name = "Glycerol"
 	id = "glycerol"
@@ -381,8 +480,23 @@
 	reagent_state = SOLID
 	color = "#C7C7C7" // rgb: 199,199,199
 	chemclass = CHEM_CLASS_BASIC
-	properties = list(PROPERTY_CARCINOGENIC = 1, PROPERTY_HEMORRAGING = 1)
-//changing carcinogenic 2->1, and changing Unstable Mutagen from 1->2 to allow for UM to be more mutagenic in botany
+	properties = list(PROPERTY_CARCINOGENIC = 2, PROPERTY_HEMORRAGING = 1)
+
+/datum/reagent/radium/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += 2*volume
+
+		tray.plant_health += -1.5*volume
+		tray.yield_mod += 0*volume
+		tray.mutation_mod += 0.2*volume
+
+		tray.mutation_level += 8*volume + tray.mutation_mod
+
+		tray.exception_check = TRUE
 
 /datum/reagent/thermite
 	name = "Thermite"
@@ -476,6 +590,15 @@
 	color = "#A8A8A8" // rgb: 168, 168, 168
 	chemclass = CHEM_CLASS_BASIC
 
+/datum/reagent/silicon/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += -0.5*volume
+		tray.exception_check = TRUE
+
 /datum/reagent/fuel
 	name = "Welding fuel"
 	id = "fuel"
@@ -497,6 +620,15 @@
 	burncolor = "#ff9900"
 	chemclass = CHEM_CLASS_RARE
 	properties = list(PROPERTY_FUELING = 5, PROPERTY_OXIDIZING = 3, PROPERTY_VISCOUS = 4, PROPERTY_TOXIC = 1)
+
+/datum/reagent/fuel/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += 2*volume
+		tray.exception_check = TRUE
 
 /datum/reagent/space_cleaner
 	name = "Space cleaner"
@@ -641,6 +773,20 @@
 	color = "#404030" // rgb: 64, 64, 48
 	chemclass = CHEM_CLASS_COMMON
 
+/datum/reagent/ammonia/robustharvest/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+
+		tray.plant_health += 0.5*volume
+		tray.yield_mod += 0*volume
+		tray.mutation_mod += 0*volume
+
+		tray.nutrilevel += 2*volume
+		tray.exception_check = TRUE
+
 /datum/reagent/hexamine
 	name = "Hexamine"
 	id = "hexamine"
@@ -665,6 +811,21 @@
 	reagent_state = LIQUID
 	color = "#604030" // rgb: 96, 64, 48
 	chemclass = CHEM_CLASS_UNCOMMON
+
+/datum/reagent/diethylamine/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.pestlevel += -2*volume
+
+		tray.plant_health += 2*volume
+		tray.yield_mod += 0*volume
+		tray.mutation_mod += 0*volume
+
+		tray.nutrilevel += 3*volume
+		tray.exception_check = TRUE
 
 /datum/reagent/blackgoo
 	name = "Black goo"
@@ -852,6 +1013,15 @@
 	M.adjust_fire_stacks(max(M.fire_stacks, 15))
 	M.IgniteMob(TRUE)
 	to_chat(M, SPAN_DANGER("It burns! It burns worse than you could ever have imagined!"))
+
+/datum/reagent/chlorinetrifluoride/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += 8*volume
+		tray.exception_check = TRUE
 
 /datum/reagent/methane
 	name = "Methane"

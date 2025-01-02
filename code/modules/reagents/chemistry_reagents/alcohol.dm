@@ -64,6 +64,26 @@
 	boozepwr = 1
 	nutriment_factor = 1 * FOOD_METABOLISM
 
+/datum/reagent/ethanol/beer/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.plant_health += -0.05*volume
+		tray.yield_mod += 0*volume
+		tray.mutation_mod += 0*volume
+
+		tray.nutrilevel += 0.25*volume
+
+		var/water_added = 0
+		var/water_input = 0.7*volume
+		water_added += water_input
+		tray.waterlevel += water_input
+
+		tray.toxins -= floor(water_added/4)
+		tray.exception_check = TRUE
+
 /datum/reagent/ethanol/beer/on_mob_life(mob/living/M)
 	. = ..()
 	if(!.)

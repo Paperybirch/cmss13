@@ -170,6 +170,22 @@
 	holder.remove_reagent("capsaicin", 10*REAGENTS_METABOLISM)
 	holder.remove_reagent("hotsauce", 10*REAGENTS_METABOLISM)
 
+/datum/reagent/drink/milk/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.nutrilevel += 0.1*volume
+
+		var/water_added = 0
+		var/water_input = 0.9*volume
+		water_added += water_input
+		tray.waterlevel += water_input
+
+		tray.toxins -= floor(water_added/4)
+		tray.exception_check = TRUE
+
 /datum/reagent/drink/milk/soymilk
 	name = "Soy Milk"
 	id = "soymilk"
@@ -275,6 +291,27 @@
 	color = "#619494" // rgb: 97, 148, 148
 	adj_dizzy = -5
 	adj_drowsy = -3
+
+/datum/reagent/drink/cold/sodawater/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+
+		tray.plant_health += 0.1*volume
+		tray.yield_mod += 0*volume
+		tray.mutation_mod += 0*volume
+
+		tray.nutrilevel += 0.1*volume
+
+		var/water_added = 0
+		var/water_input = 1*volume
+		water_added += water_input
+		tray.waterlevel += water_input
+
+		tray.toxins -= floor(water_added/4)
+		tray.exception_check = TRUE
 
 /datum/reagent/drink/cold/grapesoda
 	name = "Grape Soda"

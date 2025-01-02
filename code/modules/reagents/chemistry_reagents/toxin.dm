@@ -12,6 +12,15 @@
 	custom_metabolism = AMOUNT_PER_TIME(1, 20 SECONDS)
 	properties = list(PROPERTY_TOXIC = 1)// Toxins are really weak, but without being treated, last very long.
 
+/datum/reagent/toxin/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += 2*volume
+		tray.exception_check = TRUE
+
 /datum/reagent/toxin/hptoxin
 	name = "Toxin"
 	id = "hptoxin"
@@ -45,8 +54,18 @@
 	reagent_state = LIQUID
 	color = "#13BC5E" // rgb: 19, 188, 94
 	chemclass = CHEM_CLASS_UNCOMMON
-	properties = list(PROPERTY_CARCINOGENIC = 2)
-//changing carcinogenic 1->2, and changing Radium from 1->2 to allow for UM to be more mutagenic in botany
+	properties = list(PROPERTY_CARCINOGENIC = 1)
+
+/datum/reagent/toxin/mutagen/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += 2.5*volume
+
+		tray.mutation_level += 15*volume + tray.mutation_mod
+		tray.exception_check = TRUE
 
 /datum/reagent/toxin/phoron
 	name = "Phoron"
@@ -154,19 +173,72 @@
 	name = "EZ Nutrient"
 	id = "eznutrient"
 
+/datum/reagent/toxin/fertilizer/eznutrient/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.nutrilevel += 1*volume
+		tray.exception_check = TRUE
+
 /datum/reagent/toxin/fertilizer/left4zed
 	name = "Left-4-Zed"
 	id = "left4zed"
 
+/datum/reagent/toxin/fertilizer/left4zed/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+
+		tray.plant_health += 0*volume
+		tray.yield_mod += 0*volume
+		tray.mutation_mod += 0.2*volume
+
+		tray.nutrilevel += 1*volume
+		tray.exception_check = TRUE
+
 /datum/reagent/toxin/fertilizer/robustharvest
 	name = "Robust Harvest"
 	id = "robustharvest"
+
+/datum/reagent/toxin/fertilizer/robustharvest/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+
+		tray.plant_health += 0*volume
+		tray.yield_mod += 0.2*volume
+		tray.mutation_mod += 0*volume
+
+		tray.nutrilevel += 1*volume
+		tray.exception_check = TRUE
 
 /datum/reagent/toxin/dinitroaniline
 	name = "Dinitroaniline"
 	id = "dinitroaniline"
 	description = "Dinitroanilines are a class of chemical compounds used industrially in the production of pesticides and herbicides."
 	chemclass = CHEM_CLASS_UNCOMMON
+
+/datum/reagent/toxin/dinitroaniline/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += 2*volume
+		tray.weedlevel += -6*volume
+		tray.pestlevel += -3*volume
+
+		tray.plant_health += -0.5*volume
+		tray.yield_mod += 0*volume
+		tray.mutation_mod += 0.1*volume
+
+		tray.exception_check = TRUE
 
 /datum/reagent/toxin/plantbgone
 	name = "Plant-B-Gone"
@@ -175,6 +247,21 @@
 	reagent_state = LIQUID
 	color = "#49002E" // rgb: 73, 0, 46
 	properties = list(PROPERTY_TOXIC = 2)
+
+/datum/reagent/toxin/plantbgone/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += 3*volume
+		tray.weedlevel += -8*volume
+
+		tray.plant_health += -2*volume
+		tray.yield_mod += 0*volume
+		tray.mutation_mod += 0.2*volume
+
+		tray.exception_check = TRUE
 
 /datum/reagent/toxin/stoxin
 	name = "Soporific"
@@ -247,6 +334,21 @@
 	chemclass = CHEM_CLASS_BASIC
 	properties = list(PROPERTY_TOXIC = 1, PROPERTY_CORROSIVE = 3)
 
+/datum/reagent/toxin/acid/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += 1.5*volume
+		tray.weedlevel += -2*volume
+
+		tray.plant_health += -1*volume
+		tray.yield_mod += 0*volume
+		tray.mutation_mod += 0*volume
+
+		tray.exception_check = TRUE
+
 /datum/reagent/toxin/acid/polyacid
 	name = "Polytrinic acid"
 	id = "pacid"
@@ -257,6 +359,21 @@
 	meltprob = 30
 	chemclass = CHEM_CLASS_UNCOMMON
 	properties = list(PROPERTY_TOXIC = 2, PROPERTY_CORROSIVE = 3)
+
+/datum/reagent/toxin/acid/polyacid/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += 3*volume
+		tray.weedlevel += -4*volume
+
+		tray.plant_health += -2*volume
+		tray.yield_mod += 0*volume
+		tray.mutation_mod += 0*volume
+
+		tray.exception_check = TRUE
 
 /datum/reagent/toxin/formaldehyde
 	name = "Formaldehyde"

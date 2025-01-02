@@ -44,8 +44,7 @@
 
 	// Seed details/line data.
 	var/datum/seed/seed = null // The currently planted seed
-
-	var/obj
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/h_tray = null
 	var/exception_check = FALSE
 
 	// Reagent information for process(), consider moving this to a controller along
@@ -111,7 +110,6 @@ var/global/list/water_reagents = list(
 	"flourine" =    -0.5,
 	"chlorine" =    -0.5,
 	"phosphorus" =  -0.5,
-	"water" =    1,
 	"sodawater" =    1,
 	)
 
@@ -283,53 +281,11 @@ var/global/list/mutagenic_reagents = list(
 
 //Process reagents being input into the tray.
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/reaction_hydro_tray_exception(datum/reagent/R, reagent_total)
-
-	if(seed && !dead)
-		//Handle some general level adjustments.
-		if(toxic_reagents[R.id])
-			toxins += toxic_reagents[R.id]  * reagent_total
-			exception_check = TRUE
-		if(weedkiller_reagents[R.id])
-			weedlevel += weedkiller_reagents[R.id] * reagent_total
-			exception_check = TRUE
-		if(pestkiller_reagents[R.id])
-			pestlevel += pestkiller_reagents[R.id] * reagent_total
-			exception_check = TRUE
-
-		// Beneficial reagents have a few impacts along with health buffs.
-		if(beneficial_reagents[R.id])
-			plant_health += beneficial_reagents[R.id][1]    * reagent_total
-			yield_mod += beneficial_reagents[R.id][2] * reagent_total
-			mutation_mod += beneficial_reagents[R.id][3] * reagent_total
-			exception_check = TRUE
-
-		// Mutagen is distinct from the previous types and mostly has a chance of proccing a mutation.
-		if(mutagenic_reagents[R.id])
-			mutation_level += reagent_total*mutagenic_reagents[R.id]+mutation_mod
-			exception_check = TRUE
-
-	// Handle nutrient refilling.
-	if(nutrient_reagents[R.id])
-		nutrilevel += nutrient_reagents[R.id]  * reagent_total
-		exception_check = TRUE
-	// Handle water and water refilling.
-	var/water_added = 0
-	if(water_reagents[R.id])
-		var/water_input = water_reagents[R.id] * reagent_total
-		water_added += water_input
-		waterlevel += water_input
-		exception_check = TRUE
-
-	// Water dilutes toxin level.
-	if(water_added > 0)
-		toxins -= floor(water_added/4)
+	R.reaction_hydro_tray(src, reagent_total)
 
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/reaction_hydro_tray_properties(datum/reagent/R, reagent_total)
 	for(var/datum/chem_property/P in R.properties)
-		mutation_mod = 2
-		P.reaction_hydro_tray(/obj/structure/machinery/portable_atmospherics/hydroponics, reagent_total, (P.level)/2)
-
-
+		P.reaction_hydro_tray(src, reagent_total, (P.level)/2)
 
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/process_reagents()
 

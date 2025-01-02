@@ -136,6 +136,9 @@ GLOBAL_LIST_INIT(name2reagent, build_name2reagent())
 		P.reaction_turf(T, volume, potency)
 	return
 
+/datum/reagent/proc/reaction_hydro_tray(obj/O, volume)
+	return
+
 /datum/reagent/proc/on_mob_life(mob/living/M, alien, delta_time)
 	if(alien == IS_HORROR || !holder)
 		return

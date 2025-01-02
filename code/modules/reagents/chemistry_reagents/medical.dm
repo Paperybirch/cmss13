@@ -25,6 +25,15 @@
 	chemclass = CHEM_CLASS_UNCOMMON
 	properties = list(PROPERTY_AIDING = 2)
 
+/datum/reagent/medical/ryetalyn/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.mutation_level += -8*volume + tray.mutation_mod
+		tray.exception_check = TRUE
+
 /datum/reagent/medical/paracetamol
 	name = "Paracetamol"
 	id = "paracetamol"
@@ -146,6 +155,15 @@
 	chemclass = CHEM_CLASS_COMMON
 	properties = list(PROPERTY_ANTITOXIC = 2, PROPERTY_ANTIHALLUCINOGENIC = 2)
 
+/datum/reagent/medical/anti_toxin/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += -2*volume
+		tray.exception_check = TRUE
+
 /datum/reagent/medical/adminordrazine //An OP chemical for admins
 	name = "Adminordrazine"
 	id = "adminordrazine"
@@ -154,6 +172,30 @@
 	color = "#dae63b" // rgb: 200, 165, 220
 	properties = list(PROPERTY_OMNIPOTENT = 2)
 	flags = REAGENT_TYPE_MEDICAL
+
+/datum/reagent/medical/adminordrazine/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += 3*volume
+		tray.weedlevel += -5*volume
+		tray.pestlevel += -5*volume
+
+		tray.plant_health += 1*volume
+		tray.yield_mod += 1*volume
+		tray.mutation_mod += 1*volume
+
+		tray.nutrilevel += 1*volume
+
+		var/water_added = 0
+		var/water_input = 1*volume
+		water_added += water_input
+		tray.waterlevel += water_input
+
+		tray.toxins -= floor(water_added/4)
+		tray.exception_check = TRUE
 
 /datum/reagent/medical/thwei //OP yautja chem
 	name = "Thwei"
@@ -203,6 +245,18 @@
 	overdose_critical = REAGENTS_OVERDOSE_CRITICAL/2
 	chemclass = CHEM_CLASS_UNCOMMON
 	properties = list(PROPERTY_ANTITOXIC = 1, PROPERTY_BIOCIDIC = 1)
+
+/datum/reagent/medical/arithrazine/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.toxins += -1.5*volume
+
+		tray.mutation_level += -6*volume + tray.mutation_mod
+
+		tray.exception_check = TRUE
 
 /datum/reagent/medical/russianred
 	name = "Russian Red"
