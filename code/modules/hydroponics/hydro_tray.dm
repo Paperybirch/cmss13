@@ -45,6 +45,9 @@
 	// Seed details/line data.
 	var/datum/seed/seed = null // The currently planted seed
 
+	var/obj
+	var/exception_check = FALSE
+
 	// Reagent information for process(), consider moving this to a controller along
 	// with cycle information under 'mechanical concerns' at some point.
 
@@ -65,15 +68,6 @@ var/global/list/toxic_reagents = list(
 	"plantbgone" =   3,
 	"chlorine trifluoride" = 8
 	)
-var/global/list/toxic_reagents_exception = list(
-	"arithrazine" = -1.5,
-	"carbon" =  -1,
-	"silicon" = -0.5,
-	"chlorine" = 1.5,
-	"dinitroaniline" =  2,
-	"fluorine" = 2.5,
-	"plantbgone" =   3,
-	)
 
 var/global/list/nutrient_reagents = list(
 	"milk" = 0.1,
@@ -82,19 +76,6 @@ var/global/list/nutrient_reagents = list(
 	"sodawater" =    0.1,
 	"beer" = 0.25,
 	"nutriment" =    1,
-	"adminordrazine" =  1,
-	"eznutrient" =   1,
-	"robustharvest" =   1,
-	"left4zed" = 1,
-	"ammonia" =  2,
-	"diethylamine" = 3
-	)
-var/global/list/nutrient_reagents_exception = list(
-	"milk" = 0.1,
-	"phosphorus" =   0.1,
-	"sugar" =    0.1,
-	"sodawater" =    0.1,
-	"beer" = 0.25,
 	"adminordrazine" =  1,
 	"eznutrient" =   1,
 	"robustharvest" =   1,
@@ -114,24 +95,12 @@ var/global/list/weedkiller_reagents = list(
 	"phosphorus" =  -2,
 	"sugar" =    2
 	)
-var/global/list/weedkiller_reagents_exception = list(
-	"plantbgone" =  -8,
-	"dinitroaniline" = -6,
-	"adminordrazine" = -5,
-	"chlorine" =    -3,
-	"phosphorus" =  -2,
-	)
 
 var/global/list/pestkiller_reagents = list(
 	"adminordrazine" = -5,
 	"dinitroaniline" = -3,
 	"diethylamine" =   -2,
 	"sugar" =    2
-	)
-var/global/list/pestkiller_reagents_exception = list(
-	"adminordrazine" = -5,
-	"dinitroaniline" = -3,
-	"diethylamine" =   -2,
 	)
 
 var/global/list/water_reagents = list(
@@ -165,18 +134,6 @@ var/global/list/beneficial_reagents = list(
 	"robustharvest" =  list(  0, 0.2, 0   ),
 	"left4zed" =    list(  0, 0,   0.2 )
 	)
-var/global/list/beneficial_reagents_exception = list(
-	"beer" =    list( -0.05, 0,   0   ),
-	"chlorine" =    list( -1, 0,   0   ),
-	"phosphorus" =  list( -0.75, 0,   0   ),
-	"sodawater" =   list(  0.1,  0,   0   ),
-	"plantbgone" =  list( -2, 0,   0.2 ),
-	"dinitroaniline" = list( -0.5,  0,   0.1 ),
-	"ammonia" = list(  0.5,  0,   0   ),
-	"diethylamine" =   list(  2, 0,   0   ),
-	"adminordrazine" = list(  1, 1,   1   ),
-	"left4zed" =    list(  0, 0,   0.2 )
-	)
 
 	// Mutagen list specifies minimum value for the mutation to take place, rather
 	// than a bound as the lists above specify.
@@ -185,9 +142,6 @@ var/global/list/mutagenic_reagents = list(
 	"arithrazine" = -6,
 	"radium" =  8,
 	"mutagen" = 15
-	)
-var/global/list/mutagenic_reagents_exception = list(
-	"arithrazine" = -6
 	)
 
 /obj/structure/machinery/portable_atmospherics/hydroponics/Initialize()
@@ -328,6 +282,55 @@ var/global/list/mutagenic_reagents_exception = list(
 	return
 
 //Process reagents being input into the tray.
+/obj/structure/machinery/portable_atmospherics/hydroponics/proc/reaction_hydro_tray_exception(datum/reagent/R, reagent_total)
+
+	if(seed && !dead)
+		//Handle some general level adjustments.
+		if(toxic_reagents[R.id])
+			toxins += toxic_reagents[R.id]  * reagent_total
+			exception_check = TRUE
+		if(weedkiller_reagents[R.id])
+			weedlevel += weedkiller_reagents[R.id] * reagent_total
+			exception_check = TRUE
+		if(pestkiller_reagents[R.id])
+			pestlevel += pestkiller_reagents[R.id] * reagent_total
+			exception_check = TRUE
+
+		// Beneficial reagents have a few impacts along with health buffs.
+		if(beneficial_reagents[R.id])
+			plant_health += beneficial_reagents[R.id][1]    * reagent_total
+			yield_mod += beneficial_reagents[R.id][2] * reagent_total
+			mutation_mod += beneficial_reagents[R.id][3] * reagent_total
+			exception_check = TRUE
+
+		// Mutagen is distinct from the previous types and mostly has a chance of proccing a mutation.
+		if(mutagenic_reagents[R.id])
+			mutation_level += reagent_total*mutagenic_reagents[R.id]+mutation_mod
+			exception_check = TRUE
+
+	// Handle nutrient refilling.
+	if(nutrient_reagents[R.id])
+		nutrilevel += nutrient_reagents[R.id]  * reagent_total
+		exception_check = TRUE
+	// Handle water and water refilling.
+	var/water_added = 0
+	if(water_reagents[R.id])
+		var/water_input = water_reagents[R.id] * reagent_total
+		water_added += water_input
+		waterlevel += water_input
+		exception_check = TRUE
+
+	// Water dilutes toxin level.
+	if(water_added > 0)
+		toxins -= floor(water_added/4)
+
+/obj/structure/machinery/portable_atmospherics/hydroponics/proc/reaction_hydro_tray_properties(datum/reagent/R, reagent_total)
+	for(var/datum/chem_property/P in R.properties)
+		mutation_mod = 2
+		P.reaction_hydro_tray(/obj/structure/machinery/portable_atmospherics/hydroponics, reagent_total, (P.level)/2)
+
+
+
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/process_reagents()
 
 	if(!reagents) return
@@ -340,85 +343,17 @@ var/global/list/mutagenic_reagents_exception = list(
 	for(var/datum/reagent/R in temp_chem_holder.reagents.reagent_list)
 
 		var/reagent_total = temp_chem_holder.reagents.get_reagent_amount(R.id)
-		var/bot_chem_exception_check = TRUE
-		if(seed && !dead)
-			//Handle some general level adjustments.
-
-			if(toxic_reagents_exception[R.id])
-				toxins += toxic_reagents[R.id]  * reagent_total
-				bot_chem_exception_check = FALSE
-			if(weedkiller_reagents_exception[R.id])
-				weedlevel += weedkiller_reagents[R.id] * reagent_total
-				bot_chem_exception_check = FALSE
-			if(pestkiller_reagents_exception[R.id])
-				pestlevel += pestkiller_reagents[R.id] * reagent_total
-				bot_chem_exception_check = FALSE
-
-			// Beneficial reagents have a few impacts along with health buffs.
-
-			if(beneficial_reagents_exception[R.id])
-				plant_health += beneficial_reagents_exception[R.id][1]    * reagent_total
-				yield_mod += beneficial_reagents_exception[R.id][2] * reagent_total
-				mutation_mod += beneficial_reagents_exception[R.id][3] * reagent_total
-				bot_chem_exception_check = FALSE
-
-			// Mutagen is distinct from the previous types and mostly has a chance of proccing a mutation.
-			if(mutagenic_reagents_exception[R.id])
-				mutation_level += reagent_total*mutagenic_reagents_exception[R.id]+mutation_mod
-				bot_chem_exception_check = FALSE
-
-			//modifying here to allow for chem traits to replace beneficail_reagents list
-			if(bot_chem_exception_check == TRUE)
-				for(var/datum/chem_property/P in R.properties)
-					if (P.name ==PROPERTY_ANTITOXIC)
-						toxins += (-1-0.5*P.level)*reagent_total
-					if (P.name ==PROPERTY_TOXIC)
-						toxins += (1.5+0.5*P.level)*reagent_total
-						plant_health += (-1-P.level)*reagent_total
-					if (P.name ==PROPERTY_CARCINOGENIC)
-						toxins += (1.5+0.5*P.level)*reagent_total
-					if (P.name ==PROPERTY_NUTRITIOUS)
-						weedlevel += (1+P.level)*reagent_total
-						pestlevel += (1+P.level)*reagent_total
-						plant_health += (0.25*P.level)*reagent_total
-						yield_mod += 0.05*P.level*reagent_total
-					if (P.name ==PROPERTY_CORROSIVE)
-						weedlevel += (-1-P.level)*reagent_total
-					if (P.name ==PROPERTY_HEMORRAGING)
-						plant_health += (-1.5-P.level)*reagent_total
-						mutation_mod += 0.2*P.level*reagent_total
-					if (P.name ==PROPERTY_FLUFFING)
-						yield_mod += P.level*0.2*reagent_total
-					if (P.name == PROPERTY_AIDING)
-						mutation_mod += -4*P.level*reagent_total
-					if (P.name == PROPERTY_CARCINOGENIC)
-						mutation_level += (1+7*P.level)*reagent_total+mutation_mod
-
-
-
-
-		// Handle nutrient refilling.
-		if(nutrient_reagents_exception[R.id])
-			nutrilevel += nutrient_reagents_exception[R.id]  * reagent_total
-
-		for(var/datum/chem_property/P in R.properties)
-			if (P.name == PROPERTY_NUTRITIOUS)
-				nutrilevel += P.level*0.5*reagent_total
-
-		// Handle water and water refilling.
-		var/water_added = 0
-		if(water_reagents[R.id])
-			var/water_input = water_reagents[R.id] * reagent_total
-			water_added += water_input
-			waterlevel += water_input
-
-		// Water dilutes toxin level.
-		if(water_added > 0)
-			toxins -= floor(water_added/4)
+		exception_check = FALSE
+		reaction_hydro_tray_exception(R,reagent_total)
+		if(!exception_check)
+			reaction_hydro_tray_properties(R,reagent_total)
 
 	temp_chem_holder.reagents.clear_reagents()
 	check_level_sanity()
 	update_icon()
+
+
+
 
 //Harvests the product of a plant.
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/harvest(mob/user)

@@ -66,6 +66,9 @@
 /datum/chem_property/proc/reaction_obj(obj/O, volume, potency)
 	return
 
+/datum/chem_property/proc/reaction_hydro_tray(obj/O, volume, potency)
+	return
+
 /datum/chem_property/proc/reaction_turf(turf/T, volume, potency)
 	return
 

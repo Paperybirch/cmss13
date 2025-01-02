@@ -21,6 +21,20 @@
 /datum/chem_property/positive/antitoxic/process_critical(mob/living/M, potency = 1, delta_time)
 	M.drowsyness  = max(M.drowsyness, 30)
 
+/datum/chem_property/positive/antitoxic/reaction_hydro_tray(obj/O, volume, potency = 1)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+
+		if(!tray.seed)
+			return
+		if(tray.toxins > 0)
+			tray.toxins += -1*(potency*2)
+
+		tray.check_level_sanity()
+		tray.update_icon()
+
+
 /datum/chem_property/positive/anticorrosive
 	name = PROPERTY_ANTICORROSIVE
 	code = "ACR"
@@ -754,7 +768,7 @@
 /datum/chem_property/positive/fire/fueling/reaction_turf(turf/T, volume, potency = 1)
 	new /obj/effect/decal/cleanable/liquid_fuel(T, volume)
 
-/datum/chem_property/positive/fire/fueling/reaction_obj(obj/O, volume, potency)
+/datum/chem_property/positive/fire/fueling/reaction_hydro_tray(obj/O, volume, potency)
 	var/turf/the_turf = get_turf(O) //tries to splash fuel on object's turf
 	if(!the_turf)
 		return
@@ -958,6 +972,18 @@
 	M.apply_effect(20 * potency, PARALYZE) //Total DNA collapse // That's some long goddamn stun
 	M.apply_damage(0.5 * potency * delta_time, TOX)
 	M.apply_damage(1.5 * potency * delta_time, CLONE)
+
+/datum/chem_property/positive/aiding/reaction_hydro_tray(obj/O, volume, potency = 1)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+
+		if(!tray.seed)
+			return
+		tray.mutation_mod += -4*(potency*2)*volume
+
+		tray.check_level_sanity()
+		tray.update_icon()
 
 /datum/chem_property/positive/oxygenating
 	name = PROPERTY_OXYGENATING

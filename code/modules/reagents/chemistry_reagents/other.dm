@@ -201,6 +201,7 @@
 	description = "Chemical element of atomic number 29. A solfe malleable red metal with high thermal and electrical conductivity."
 	color = "#6E3B08" // rgb: 110, 59, 8
 	chemfiresupp = TRUE
+	properties = list(PROPERTY_FLUFFING = 4) //MAKE SURE TO CHANGE TEST VALUE
 	burncolor = "#78be5a"
 	burncolormod = 4
 	chemclass = CHEM_CLASS_BASIC

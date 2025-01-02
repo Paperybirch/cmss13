@@ -55,17 +55,17 @@
 	if(istype(O,/obj/effect/plantsegment))
 		if(prob(50)) qdel(O)
 		return
+
+/datum/chem_property/negative/toxic/reaction_hydro_tray(obj/O, volume, potency = 1)
+
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
 		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
 
 		if(!tray.seed)
 			return
-		tray.health -= rand(30,50)
-		if(tray.pestlevel > 0)
-			tray.pestlevel -= 2
-		if(tray.weedlevel > 0)
-			tray.weedlevel -= 3
-		tray.toxins += 4
+		tray.health += -1.5*(potency*2)*volume
+		tray.toxins += 1.5*(potency*2)*volume
+
 		tray.check_level_sanity()
 		tray.update_icon()
 
@@ -152,6 +152,7 @@
 			xeno.AddComponent(/datum/component/status_effect/toxic_buildup, potency * volume * 0.25)
 
 /datum/chem_property/negative/corrosive/reaction_obj(obj/O, volume, potency)
+
 	if((istype(O,/obj/item) || istype(O,/obj/effect/glowshroom)) && prob(potency * 10))
 		if(O.unacidable)
 			return
@@ -160,6 +161,19 @@
 		for(var/mob/M as anything in viewers(5, O))
 			to_chat(M, SPAN_WARNING("\The [O] melts."))
 		qdel(O)
+
+/datum/chem_property/negative/corrosive/reaction_hydro_tray(obj/O, volume, potency)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+
+		if(!tray.seed)
+			return
+		if(tray.weedlevel>0)
+			tray.toxins += -1*(potency*2)*volume
+
+		tray.check_level_sanity()
+		tray.update_icon()
 
 /datum/chem_property/negative/biocidic
 	name = PROPERTY_BIOCIDIC
@@ -276,6 +290,19 @@
 		L.add_bleeding(I, TRUE)
 		L.wounds += I
 
+/datum/chem_property/negative/hemorrhaging/reaction_hydro_tray(obj/O, volume, potency = 1)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+
+		if(!tray.seed)
+			return
+		tray.plant_health += -1*(potency*2)*volume
+		tray.mutation_mod+= 0.2*(potency*2)*volume
+
+		tray.check_level_sanity()
+		tray.update_icon()
+
 /datum/chem_property/negative/hemorrhaging/reaction_mob(mob/M, method = TOUCH, volume, potency)
 	M.AddComponent(/datum/component/status_effect/healing_reduction, potency * volume * POTENCY_MULTIPLIER_VLOW) //deals brute DOT to humans, prevents healing for xenos
 
@@ -294,6 +321,19 @@
 
 /datum/chem_property/negative/carcinogenic/process_critical(mob/living/M, potency = 1)
 	M.take_limb_damage(POTENCY_MULTIPLIER_MEDIUM * potency)//Hyperactive apoptosis
+
+/datum/chem_property/negative/carcinogenic/reaction_hydro_tray(obj/O, volume, potency = 1)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+
+		if(!tray.seed)
+			return
+		tray.toxins += 1.5*(potency*2)*volume
+		tray.mutation_level += 8*(potency*2)*volume + tray.mutation_mod
+
+		tray.check_level_sanity()
+		tray.update_icon()
 
 /datum/chem_property/negative/hepatotoxic
 	name = PROPERTY_HEPATOTOXIC

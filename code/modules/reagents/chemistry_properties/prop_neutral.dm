@@ -83,6 +83,21 @@
 	holder.nutriment_factor += level
 	..()
 
+/datum/chem_property/neutral/nutritious/reaction_hydro_tray(obj/O, volume, potency = 1)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+
+		if(!tray.seed)
+			return
+		tray.weedlevel += (potency*2)*volume
+		tray.pestlevel += (potency*2)*volume
+		tray.plant_health += 0.25*(potency*2)*volume
+		tray.yield_mod += 0.05*(potency*2)*volume
+
+		tray.check_level_sanity()
+		tray.update_icon()
+
 /datum/chem_property/neutral/ketogenic
 	name = PROPERTY_KETOGENIC
 	code = "KTG"
@@ -346,6 +361,17 @@
 /datum/chem_property/neutral/fluffing/process_critical(mob/living/M, potency = 1, delta_time)
 	to_chat(M, SPAN_WARNING("You feel like something is penetrating your skull!"))
 	M.apply_damage(0.5 * potency * delta_time, BRAIN) //Hair growing into brain
+
+/datum/chem_property/neutral/fluffing/reaction_hydro_tray(obj/O, volume, potency = 1)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.yield_mod += 0.2*(potency*2)*volume
+
+		tray.check_level_sanity()
+		tray.update_icon()
 
 /datum/chem_property/neutral/allergenic
 	name = PROPERTY_ALLERGENIC
