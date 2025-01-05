@@ -21,6 +21,8 @@
 /datum/chem_property/positive/antitoxic/process_critical(mob/living/M, potency = 1, delta_time)
 	M.drowsyness  = max(M.drowsyness, 30)
 
+//checked code correct to schema
+//Antitoxic reduces toxin level of plant in tray
 /datum/chem_property/positive/antitoxic/reaction_hydro_tray(obj/O, volume, potency = 1)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -30,10 +32,6 @@
 			return
 		if(tray.toxins > 0)
 			tray.toxins += -1*(potency*2)
-
-		tray.check_level_sanity()
-		tray.update_icon()
-
 
 /datum/chem_property/positive/anticorrosive
 	name = PROPERTY_ANTICORROSIVE
@@ -768,7 +766,7 @@
 /datum/chem_property/positive/fire/fueling/reaction_turf(turf/T, volume, potency = 1)
 	new /obj/effect/decal/cleanable/liquid_fuel(T, volume)
 
-/datum/chem_property/positive/fire/fueling/reaction_hydro_tray(obj/O, volume, potency)
+/datum/chem_property/positive/fire/fueling/reaction_obj(obj/O, volume, potency)
 	var/turf/the_turf = get_turf(O) //tries to splash fuel on object's turf
 	if(!the_turf)
 		return
@@ -837,6 +835,32 @@
 /datum/chem_property/positive/photosensetive/process(mob/living/M, potency = 1)
 	to_chat(M, SPAN_WARNING("Your feel a horrible migraine!"))
 	M.apply_internal_damage(potency, "brain")
+
+//checked code correct to schema
+//Reagents with Photosensative are rapidly uptaken by the Chloryphl A of all studied plant species, replacing the complexed magesium ion and showing significant efficiency increases of the enyzme
+//This change even is transmitted to following generations, as the chloropasts sequester sufficient amounts of the reagent, that specimens 10 generations down still titers comparable to the exposed first generation plant
+//The resultant surplus of energy and carbohydrates speed up the plants fruiting cycle and minimize metabolic stress, enabling any plant to be harvested multiple times
+//Counter increases and rolls to set plant to repeat harvest, Higher levels have reduced negatives and faster counter increase. Consumes nutrients and grows weeds
+/datum/chem_property/positive/photosensative/reaction_hydro_tray(obj/O, volume, potency = 1)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		if(tray.seed.harvest_repeat == 1)
+			return
+		tray.weedlevel += 0.8*(10-(potency*2))*volume
+
+		tray.nutrilevel += -0.8*(10-(potency*2))*volume
+
+		tray.repeat_harvest_counter += 5*(potency*2)*volume
+
+		if (tray.repeat_harvest_counter >= 100 && rand(0,2) == 2)
+			var/turf/c_turf = get_turf(O)
+			tray.seed = tray.seed.diverge()
+			tray.seed.harvest_repeat = 1
+			c_turf.visible_message(SPAN_NOTICE("\The [tray.seed.display_name] begins to shimmer with a color out of space"))
+			tray.potency_counter = 0
 
 /datum/chem_property/positive/crystallization
 	name = PROPERTY_CRYSTALLIZATION
@@ -973,6 +997,8 @@
 	M.apply_damage(0.5 * potency * delta_time, TOX)
 	M.apply_damage(1.5 * potency * delta_time, CLONE)
 
+//checked code correct to schema
+//Aiding reduces mutation_mod of plant in tray
 /datum/chem_property/positive/aiding/reaction_hydro_tray(obj/O, volume, potency = 1)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -982,8 +1008,6 @@
 			return
 		tray.mutation_mod += -4*(potency*2)*volume
 
-		tray.check_level_sanity()
-		tray.update_icon()
 
 /datum/chem_property/positive/oxygenating
 	name = PROPERTY_OXYGENATING

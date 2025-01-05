@@ -25,6 +25,7 @@
 	chemclass = CHEM_CLASS_UNCOMMON
 	properties = list(PROPERTY_AIDING = 2)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/medical/ryetalyn/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -32,6 +33,7 @@
 		if(!tray.seed)
 			return
 		tray.mutation_level += -8*volume + tray.mutation_mod
+
 		tray.exception_check = TRUE
 
 /datum/reagent/medical/paracetamol
@@ -155,6 +157,7 @@
 	chemclass = CHEM_CLASS_COMMON
 	properties = list(PROPERTY_ANTITOXIC = 2, PROPERTY_ANTIHALLUCINOGENIC = 2)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/medical/anti_toxin/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -173,13 +176,14 @@
 	properties = list(PROPERTY_OMNIPOTENT = 2)
 	flags = REAGENT_TYPE_MEDICAL
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+//excellent example of how to implement hydro_tray stat changes using reaction_hydro_tray
 /datum/reagent/medical/adminordrazine/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
 		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
 		if(!tray.seed)
 			return
-		tray.toxins += 3*volume
 		tray.weedlevel += -5*volume
 		tray.pestlevel += -5*volume
 
@@ -195,6 +199,7 @@
 		tray.waterlevel += water_input
 
 		tray.toxins -= floor(water_added/4)
+
 		tray.exception_check = TRUE
 
 /datum/reagent/medical/thwei //OP yautja chem
@@ -246,6 +251,7 @@
 	chemclass = CHEM_CLASS_UNCOMMON
 	properties = list(PROPERTY_ANTITOXIC = 1, PROPERTY_BIOCIDIC = 1)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/medical/arithrazine/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))

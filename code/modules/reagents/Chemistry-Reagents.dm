@@ -136,6 +136,7 @@ GLOBAL_LIST_INIT(name2reagent, build_name2reagent())
 		P.reaction_turf(T, volume, potency)
 	return
 
+//Process which takes an object, a hydrotray typically, and volume of reagent in temp holder buffer. Used to apply botany related effects for any chemical hydrotray reservoir
 /datum/reagent/proc/reaction_hydro_tray(obj/O, volume)
 	return
 

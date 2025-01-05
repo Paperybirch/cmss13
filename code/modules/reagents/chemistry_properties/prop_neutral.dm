@@ -1,23 +1,3 @@
-/datum/chem_property/neutral
-	rarity = PROPERTY_DISABLED
-	category = PROPERTY_TYPE_IRRITANT
-	value = -1
-
-/datum/chem_property/neutral/YieldAmp
-	name = PROPERTY_YIELDAMP
-	code = "BYA"
-	description = "The chemical is passively metabolized with no other effects in temperatures above 170 kelvin. Below however, the chemical will metabolize with increased effect."
-	rarity = PROPERTY_COMMON
-	category = PROPERTY_TYPE_BOTANICAL
-	value = 1
-
-
-
-
-
-
-
-
 /datum/chem_property/neutral/cryometabolizing
 	name = PROPERTY_CRYOMETABOLIZING
 	code = "CMB"
@@ -57,6 +37,31 @@
 /datum/chem_property/neutral/excreting/pre_process(mob/living/M)
 	return list(REAGENT_PURGE = level)
 
+//checked code correct to schema
+//Reagents with excreting speed up the plants metabolism, altering even phosphorylation of DNA producing inheritable changes, upregulating excretory pathways and increasing the chemicals its fruit yields
+//Counter Filling until >=100, then roll for potency increase. This is unhealthy reducing plant health, consumes nutrient, produces many toxins, and increases weeds
+//good example of how to use reaction_hydro_tray to modify the properties of the seed in tray
+/datum/chem_property/neutral/excreting/reaction_hydro_tray(obj/O, volume, potency_prop = 1)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+
+		if(!tray.seed)
+			return
+		tray.toxins += 1.2*(potency_prop*2)*volume
+		tray.weedlevel += 1*(potency_prop*2)*volume
+
+		tray.nutrilevel += -0.25*(potency_prop*2)*volume
+
+		tray.potency_counter += 5*(potency_prop*2)*volume
+
+		if (tray.potency_counter >= 100 && rand(0,potency_prop*2) > 0)
+			var/turf/c_turf = get_turf(O)
+			tray.seed = tray.seed.diverge()
+			tray.seed.potency += rand(1,potency_prop*2)
+			c_turf.visible_message(SPAN_NOTICE("\The [tray.seed.display_name] rustles as its branches bow"))
+			tray.potency_counter = 0
+
 /datum/chem_property/neutral/nutritious
 	name = PROPERTY_NUTRITIOUS
 	code = "NTR"
@@ -83,6 +88,8 @@
 	holder.nutriment_factor += level
 	..()
 
+//checked code correct to schema
+//Nutritious Increases pest, weed, plant health and yield mod of plant in tray
 /datum/chem_property/neutral/nutritious/reaction_hydro_tray(obj/O, volume, potency = 1)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -90,13 +97,11 @@
 
 		if(!tray.seed)
 			return
-		tray.weedlevel += (potency*2)*volume
-		tray.pestlevel += (potency*2)*volume
-		tray.plant_health += 0.25*(potency*2)*volume
-		tray.yield_mod += 0.05*(potency*2)*volume
+		tray.weedlevel += 0.5*(potency*2)*volume
+		tray.pestlevel += 0.5*(potency*2)*volume
 
-		tray.check_level_sanity()
-		tray.update_icon()
+		tray.plant_health += 0.5*(potency*2)*volume
+		tray.yield_mod += 0.05*(potency*2)*volume
 
 /datum/chem_property/neutral/ketogenic
 	name = PROPERTY_KETOGENIC
@@ -362,16 +367,23 @@
 	to_chat(M, SPAN_WARNING("You feel like something is penetrating your skull!"))
 	M.apply_damage(0.5 * potency * delta_time, BRAIN) //Hair growing into brain
 
+//checked code correct to schema
+//Reagents with fluffing increase the yield of individual plants. However this drains alot of nutrients and water
 /datum/chem_property/neutral/fluffing/reaction_hydro_tray(obj/O, volume, potency = 1)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
 		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+
 		if(!tray.seed)
 			return
 		tray.yield_mod += 0.2*(potency*2)*volume
 
-		tray.check_level_sanity()
-		tray.update_icon()
+		tray.nutrilevel += -0.5*(potency*2)*volume
+
+		var/water_added = 0
+		var/water_input = -0.1*(potency*2)*volume
+		water_added += water_input
+		tray.waterlevel += water_input
 
 /datum/chem_property/neutral/allergenic
 	name = PROPERTY_ALLERGENIC

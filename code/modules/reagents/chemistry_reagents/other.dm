@@ -69,6 +69,39 @@
 	objective_value = OBJECTIVE_HIGH_VALUE
 	properties = list(PROPERTY_CORROSIVE = 3)
 
+//checked code correct to schema
+//-- Begin WY Log Classification XX -- I have to thank our janitor for having such a green thumb. Initial tests with acidic blood showed strong plant killing effects, and we left it at that
+//content to continue to rarer XX-121 serums, Yet one of our janitors showed great care in tending to a plant the research staff marked for dead. His reward his finger burning off as he pruned the plant,
+//the plant somehow began synthesizing acidic blood, and further yet, aggressivly modified chemical excretion pathways to produce only acidic blood
+//Acidic Blood causes massive toxin accumulation and plant health damage. 20% chance to purge a chemical from plant until it replaces the last chem with acidic blood
+//example of how to remove chems from plant using reaction_hydro_tray
+/datum/reagent/blood/xeno_blood/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+
+		if(!tray.seed)
+			return
+		tray.toxins += 12*volume
+
+		tray.plant_health += -4*volume
+
+		if(rand(0,10) <= 2)
+			var/turf/c_turf = get_turf(O)
+			tray.seed = tray.seed.diverge()
+
+			if(length(tray.seed.chems) > 1)
+				tray.seed.chems.Remove(tray.seed.chems[rand(1,length(tray.seed.chems))])
+				c_turf.visible_message(SPAN_NOTICE("\The [tray.seed.display_name] Sizzles and Pops"))
+
+			if(length(tray.seed.chems) <= 1)
+				if (tray.seed.chems == list("xenoblood"))
+					return
+				tray.seed.chems = list("xenoblood" = list(5,10))
+				c_turf.visible_message(SPAN_NOTICE("\The [tray.seed.display_name]'s sizzling sputters out"))
+
+		tray.exception_check = TRUE
+
 /datum/reagent/blood/xeno_blood/royal
 	name = "Dark Acidic Blood"
 	id = "xenobloodroyal"
@@ -76,6 +109,45 @@
 	chemclass = CHEM_CLASS_SPECIAL
 	objective_value = OBJECTIVE_EXTREME_VALUE
 	properties = list(PROPERTY_CORROSIVE = 6)
+
+//checked code correct to schema
+//-- Begin WY Log Classification XX -- After the results with acidic blood naturally this prime varient was tested with plant and fungal specimens. Initially dissapointment and we thought all we had was an
+//highly effective plant killer. Until we exposed the specimin first exposed to acidic blood to this dark acidic variant. The results were profound. The entire genetic matrix was broken down
+//and remolded in a chaotic, primordial progression. Various chemicals have been reported, same types as mutagen exposure produces. Yet trace amount of organic peptides were detected
+//self organizing into micro RNA fragments of a genetic structure not seen outside of xenomorph DNA
+//Dark Acidic Blood causes even more massive toxin accumulation and plant health damage. If acidic blood is made by plant 20% chance to add a chemical from standard mutation list up to 10 total chems
+//example of how to add from plant that also is dependent on conditional using reaction_hydro_tray
+/datum/reagent/blood/xeno_blood/royal/reaction_hydro_tray(obj/O, volume)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+
+		if(!tray.seed)
+			return
+		tray.toxins += 16*volume
+
+		tray.plant_health += -6*volume
+
+		if(rand(0,10) <= 2)
+			var/turf/c_turf = get_turf(O)
+			tray.seed = tray.seed.diverge()
+
+			if(length(tray.seed.chems) > 10)
+				return
+
+			if(length(tray.seed.chems) <= 1 && tray.seed.chems["xenoblood"])
+
+				var/new_chem = list(pick( prob(10);pick(GLOB.chemical_gen_classes_list["C1"]),\
+											prob(15);pick(GLOB.chemical_gen_classes_list["C2"]),\
+											prob(25);pick(GLOB.chemical_gen_classes_list["C3"]),\
+											prob(30);pick(GLOB.chemical_gen_classes_list["C4"]),\
+											prob(15);pick(GLOB.chemical_gen_classes_list["T1"]),\
+											prob(5);pick(GLOB.chemical_gen_classes_list["T2"])) = list(1,rand(2,3)))
+				tray.seed.chems += new_chem
+
+				c_turf.visible_message(SPAN_NOTICE("\The [tray.seed.display_name] flashes an erie green"))
+
+		tray.exception_check = TRUE
 
 /datum/reagent/vaccine
 	//data must contain virus type
@@ -132,6 +204,7 @@
 		if(M.fire_stacks <= 0)
 			M.ExtinguishMob()
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/water/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -144,6 +217,7 @@
 		tray.waterlevel += water_input
 
 		tray.toxins -= floor(water_added/4)
+
 		tray.exception_check = TRUE
 
 /datum/reagent/water/holywater
@@ -214,7 +288,7 @@
 	id = "copper"
 	description = "Chemical element of atomic number 29. A solfe malleable red metal with high thermal and electrical conductivity."
 	color = "#6E3B08" // rgb: 110, 59, 8
-	chemfiresupp = TRUE	
+	chemfiresupp = TRUE
 	burncolor = "#78be5a"
 	burncolormod = 4
 	chemclass = CHEM_CLASS_BASIC
@@ -304,6 +378,7 @@
 		else
 			dirtoverlay.alpha = min(dirtoverlay.alpha+volume*30, 255)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/carbon/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -311,6 +386,7 @@
 		if(!tray.seed)
 			return
 		tray.toxins += -1*volume
+
 		tray.exception_check = TRUE
 
 /datum/reagent/chlorine
@@ -324,6 +400,7 @@
 	chemclass = CHEM_CLASS_BASIC
 	properties = list(PROPERTY_BIOCIDIC = 1)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/chlorine/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -334,15 +411,12 @@
 		tray.weedlevel += -3*volume
 
 		tray.plant_health += -1*volume
-		tray.yield_mod += 0*volume
-		tray.mutation_mod += 0*volume
 
 		var/water_added = 0
 		var/water_input = -0.5*volume
 		water_added += water_input
 		tray.waterlevel += water_input
 
-		tray.toxins -= floor(water_added/4)
 		tray.exception_check = TRUE
 
 /datum/reagent/fluorine
@@ -356,6 +430,7 @@
 	chemclass = CHEM_CLASS_BASIC
 	properties = list(PROPERTY_TOXIC = 1, PROPERTY_NEUTRALIZING = 1)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/fluorine/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -366,15 +441,12 @@
 		tray.weedlevel += -4*volume
 
 		tray.plant_health += -2*volume
-		tray.yield_mod += 0*volume
-		tray.mutation_mod += 0*volume
 
 		var/water_added = 0
 		var/water_input = -0.5*volume
 		water_added += water_input
 		tray.waterlevel += water_input
 
-		tray.toxins -= floor(water_added/4)
 		tray.exception_check = TRUE
 
 /datum/reagent/sodium
@@ -403,6 +475,7 @@
 
 	custom_metabolism = AMOUNT_PER_TIME(1, 200 SECONDS)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/phosphorus/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -412,8 +485,6 @@
 		tray.weedlevel += -2*volume
 
 		tray.plant_health += -0.75*volume
-		tray.yield_mod += 0*volume
-		tray.mutation_mod += 0*volume
 
 		tray.nutrilevel += 0.1*volume
 
@@ -422,7 +493,6 @@
 		water_added += water_input
 		tray.waterlevel += water_input
 
-		tray.toxins -= floor(water_added/4)
 		tray.exception_check = TRUE
 
 /datum/reagent/lithium
@@ -450,6 +520,7 @@
 	properties = list(PROPERTY_NUTRITIOUS = 1)
 	flags = REAGENT_TYPE_MEDICAL
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/sugar/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -482,6 +553,7 @@
 	chemclass = CHEM_CLASS_BASIC
 	properties = list(PROPERTY_CARCINOGENIC = 2, PROPERTY_HEMORRAGING = 1)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/radium/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -491,7 +563,6 @@
 		tray.toxins += 2*volume
 
 		tray.plant_health += -1.5*volume
-		tray.yield_mod += 0*volume
 		tray.mutation_mod += 0.2*volume
 
 		tray.mutation_level += 8*volume + tray.mutation_mod
@@ -590,6 +661,7 @@
 	color = "#A8A8A8" // rgb: 168, 168, 168
 	chemclass = CHEM_CLASS_BASIC
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/silicon/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -597,6 +669,7 @@
 		if(!tray.seed)
 			return
 		tray.toxins += -0.5*volume
+
 		tray.exception_check = TRUE
 
 /datum/reagent/fuel
@@ -621,6 +694,7 @@
 	chemclass = CHEM_CLASS_RARE
 	properties = list(PROPERTY_FUELING = 5, PROPERTY_OXIDIZING = 3, PROPERTY_VISCOUS = 4, PROPERTY_TOXIC = 1)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/fuel/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -628,6 +702,7 @@
 		if(!tray.seed)
 			return
 		tray.toxins += 2*volume
+
 		tray.exception_check = TRUE
 
 /datum/reagent/space_cleaner
@@ -773,18 +848,17 @@
 	color = "#404030" // rgb: 64, 64, 48
 	chemclass = CHEM_CLASS_COMMON
 
-/datum/reagent/ammonia/robustharvest/reaction_hydro_tray(obj/O, volume)
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/datum/reagent/ammonia/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
 		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
 		if(!tray.seed)
 			return
-
 		tray.plant_health += 0.5*volume
-		tray.yield_mod += 0*volume
-		tray.mutation_mod += 0*volume
 
 		tray.nutrilevel += 2*volume
+
 		tray.exception_check = TRUE
 
 /datum/reagent/hexamine
@@ -812,6 +886,7 @@
 	color = "#604030" // rgb: 96, 64, 48
 	chemclass = CHEM_CLASS_UNCOMMON
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/diethylamine/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -821,10 +896,9 @@
 		tray.pestlevel += -2*volume
 
 		tray.plant_health += 2*volume
-		tray.yield_mod += 0*volume
-		tray.mutation_mod += 0*volume
 
 		tray.nutrilevel += 3*volume
+
 		tray.exception_check = TRUE
 
 /datum/reagent/blackgoo
@@ -1014,6 +1088,7 @@
 	M.IgniteMob(TRUE)
 	to_chat(M, SPAN_DANGER("It burns! It burns worse than you could ever have imagined!"))
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/chlorinetrifluoride/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -1021,6 +1096,7 @@
 		if(!tray.seed)
 			return
 		tray.toxins += 8*volume
+
 		tray.exception_check = TRUE
 
 /datum/reagent/methane
@@ -1217,6 +1293,34 @@
 	chemclass = CHEM_CLASS_SPECIAL
 	objective_value = OBJECTIVE_EXTREME_VALUE
 	properties = list(PROPERTY_BIOCIDIC = 2)
+
+//checked code correct to schema
+//BEGIN LOG -- WY Report Classification level XX -- Upon receiving the sample we set out to testing it upon various living organisms. Against Vertebrates a rupturing effect of membranes, Yet
+//with plant and fungi and insect and arthropod speciments they are capable of surviving exposure, and seem to thrive, enjoing a faster growth rate. However exposed specimens exhibet concerning behavior
+//with zero detectible cues the exposded, including plant species, without fail orient themselves facing the scientists studying them, and instinctually seek to escape containment
+//further study revealed the plasma had completely bound with the hosts DNA, acting as a new set of gene regulating mechanisms...
+//Purple Plamsa rapidly increases the pests and drains nutrients in the tray. repeat_harvest_counter increases to 100, requiring ~76 purple plasma and ~25 cycles at 3u consumption per cycle
+/datum/reagent/plasma/purple/reaction_hydro_tray(obj/O, volume)
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+		if(!tray.seed)
+			return
+		tray.pestlevel += 6*volume
+
+		tray.nutrilevel += -5*volume
+
+		if(tray.seed.production <= 1)
+			return
+
+		tray.repeat_harvest_counter += 1.3*volume
+
+		if (tray.repeat_harvest_counter >= 100)
+			var/turf/c_turf = get_turf(O)
+
+			tray.seed = tray.seed.diverge()
+			tray.seed.harvest_repeat = 1
+			c_turf.visible_message(SPAN_NOTICE("\The [tray.seed.display_name] bristles and sways towards you!"))
+			tray.repeat_harvest_counter = 0
 
 /datum/reagent/plasma/royal
 	name = "Royal Plasma"

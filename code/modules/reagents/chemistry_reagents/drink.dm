@@ -170,6 +170,7 @@
 	holder.remove_reagent("capsaicin", 10*REAGENTS_METABOLISM)
 	holder.remove_reagent("hotsauce", 10*REAGENTS_METABOLISM)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/drink/milk/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -292,6 +293,7 @@
 	adj_dizzy = -5
 	adj_drowsy = -3
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/drink/cold/sodawater/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -300,8 +302,6 @@
 			return
 
 		tray.plant_health += 0.1*volume
-		tray.yield_mod += 0*volume
-		tray.mutation_mod += 0*volume
 
 		tray.nutrilevel += 0.1*volume
 
@@ -311,6 +311,7 @@
 		tray.waterlevel += water_input
 
 		tray.toxins -= floor(water_added/4)
+
 		tray.exception_check = TRUE
 
 /datum/reagent/drink/cold/grapesoda

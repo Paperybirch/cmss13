@@ -17,7 +17,8 @@
 	properties = list(PROPERTY_NEOGENETIC = 1, PROPERTY_NUTRITIOUS = 2, PROPERTY_HEMOGENIC = 1)
 	flags = REAGENT_SCANNABLE
 
-/datum/reagent/toxin/fertilizer/robustharvest/reaction_hydro_tray(obj/O, volume)
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/datum/reagent/nutriment/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
 		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
@@ -26,9 +27,9 @@
 
 		tray.plant_health += 0.5*volume
 		tray.yield_mod += 0.1*volume
-		tray.mutation_mod += 0*volume
 
 		tray.nutrilevel += 1*volume
+
 		tray.exception_check = TRUE
 
 /datum/reagent/nutriment/egg

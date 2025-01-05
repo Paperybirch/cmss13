@@ -12,6 +12,7 @@
 	custom_metabolism = AMOUNT_PER_TIME(1, 20 SECONDS)
 	properties = list(PROPERTY_TOXIC = 1)// Toxins are really weak, but without being treated, last very long.
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/toxin/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -19,6 +20,7 @@
 		if(!tray.seed)
 			return
 		tray.toxins += 2*volume
+
 		tray.exception_check = TRUE
 
 /datum/reagent/toxin/hptoxin
@@ -56,6 +58,7 @@
 	chemclass = CHEM_CLASS_UNCOMMON
 	properties = list(PROPERTY_CARCINOGENIC = 1)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/toxin/mutagen/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -65,6 +68,7 @@
 		tray.toxins += 2.5*volume
 
 		tray.mutation_level += 15*volume + tray.mutation_mod
+
 		tray.exception_check = TRUE
 
 /datum/reagent/toxin/phoron
@@ -173,6 +177,7 @@
 	name = "EZ Nutrient"
 	id = "eznutrient"
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/toxin/fertilizer/eznutrient/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -180,42 +185,44 @@
 		if(!tray.seed)
 			return
 		tray.nutrilevel += 1*volume
+
 		tray.exception_check = TRUE
 
 /datum/reagent/toxin/fertilizer/left4zed
 	name = "Left-4-Zed"
 	id = "left4zed"
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/toxin/fertilizer/left4zed/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
 		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
 		if(!tray.seed)
 			return
-
-		tray.plant_health += 0*volume
-		tray.yield_mod += 0*volume
 		tray.mutation_mod += 0.2*volume
 
 		tray.nutrilevel += 1*volume
+
 		tray.exception_check = TRUE
 
+//Added fluffing trait to robust harvest, frankly a QOL choice to make fluffing guarenteed. Robust harvest is effective enough for yield boosting but I dislike spam clicking 30 10u cans into a tray
+//Feel free to remove properties fluffing add if disagree with choice
 /datum/reagent/toxin/fertilizer/robustharvest
 	name = "Robust Harvest"
 	id = "robustharvest"
+	properties = list(PROPERTY_FLUFFING = 0.5)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/toxin/fertilizer/robustharvest/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
 		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
 		if(!tray.seed)
 			return
-
-		tray.plant_health += 0*volume
 		tray.yield_mod += 0.2*volume
-		tray.mutation_mod += 0*volume
 
 		tray.nutrilevel += 1*volume
+
 		tray.exception_check = TRUE
 
 /datum/reagent/toxin/dinitroaniline
@@ -224,6 +231,7 @@
 	description = "Dinitroanilines are a class of chemical compounds used industrially in the production of pesticides and herbicides."
 	chemclass = CHEM_CLASS_UNCOMMON
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/toxin/dinitroaniline/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -235,10 +243,11 @@
 		tray.pestlevel += -3*volume
 
 		tray.plant_health += -0.5*volume
-		tray.yield_mod += 0*volume
+
 		tray.mutation_mod += 0.1*volume
 
 		tray.exception_check = TRUE
+
 
 /datum/reagent/toxin/plantbgone
 	name = "Plant-B-Gone"
@@ -248,6 +257,7 @@
 	color = "#49002E" // rgb: 73, 0, 46
 	properties = list(PROPERTY_TOXIC = 2)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/toxin/plantbgone/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -258,7 +268,6 @@
 		tray.weedlevel += -8*volume
 
 		tray.plant_health += -2*volume
-		tray.yield_mod += 0*volume
 		tray.mutation_mod += 0.2*volume
 
 		tray.exception_check = TRUE
@@ -334,6 +343,7 @@
 	chemclass = CHEM_CLASS_BASIC
 	properties = list(PROPERTY_TOXIC = 1, PROPERTY_CORROSIVE = 3)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/toxin/acid/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -344,8 +354,6 @@
 		tray.weedlevel += -2*volume
 
 		tray.plant_health += -1*volume
-		tray.yield_mod += 0*volume
-		tray.mutation_mod += 0*volume
 
 		tray.exception_check = TRUE
 
@@ -360,6 +368,7 @@
 	chemclass = CHEM_CLASS_UNCOMMON
 	properties = list(PROPERTY_TOXIC = 2, PROPERTY_CORROSIVE = 3)
 
+//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
 /datum/reagent/toxin/acid/polyacid/reaction_hydro_tray(obj/O, volume)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -370,8 +379,6 @@
 		tray.weedlevel += -4*volume
 
 		tray.plant_health += -2*volume
-		tray.yield_mod += 0*volume
-		tray.mutation_mod += 0*volume
 
 		tray.exception_check = TRUE
 

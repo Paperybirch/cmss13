@@ -66,6 +66,7 @@
 /datum/chem_property/proc/reaction_obj(obj/O, volume, potency)
 	return
 
+//Process which takes an object, a hydrotray typically, volume of reagent in temp holder buffer and property potency. Used to apply botany related effects for any chemical hydrotray reservoir
 /datum/chem_property/proc/reaction_hydro_tray(obj/O, volume, potency)
 	return
 
@@ -107,8 +108,6 @@
 	if(category & PROPERTY_TYPE_METABOLITE)
 		text += "Metabolite "
 	if(category & PROPERTY_TYPE_ANOMALOUS)
-		text += "Anomalous "
-	if(category & PROPERTY_TYPE_BOTANICAL)
-		text += "Botanical "
+		text += "Anomalous "	"
 	return text
 

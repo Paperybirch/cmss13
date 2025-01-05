@@ -56,6 +56,8 @@
 		if(prob(50)) qdel(O)
 		return
 
+//checked code correct to schema
+//Toxic Hurts health, increases toxin level of plant in tray
 /datum/chem_property/negative/toxic/reaction_hydro_tray(obj/O, volume, potency = 1)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -65,9 +67,6 @@
 			return
 		tray.health += -1.5*(potency*2)*volume
 		tray.toxins += 1.5*(potency*2)*volume
-
-		tray.check_level_sanity()
-		tray.update_icon()
 
 /datum/chem_property/negative/toxic/reaction_mob(mob/living/M, method=TOUCH, volume, potency = 1)
 	if(!iscarbon(M))
@@ -162,6 +161,8 @@
 			to_chat(M, SPAN_WARNING("\The [O] melts."))
 		qdel(O)
 
+//checked code correct to schema
+//Corrosive kills weeds in tray
 /datum/chem_property/negative/corrosive/reaction_hydro_tray(obj/O, volume, potency)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -170,10 +171,7 @@
 		if(!tray.seed)
 			return
 		if(tray.weedlevel>0)
-			tray.toxins += -1*(potency*2)*volume
-
-		tray.check_level_sanity()
-		tray.update_icon()
+			tray.weedlevel += -1*(potency*2)*volume
 
 /datum/chem_property/negative/biocidic
 	name = PROPERTY_BIOCIDIC
@@ -192,6 +190,18 @@
 
 /datum/chem_property/negative/biocidic/process_critical(mob/living/M, potency = 1)
 	M.take_limb_damage(POTENCY_MULTIPLIER_VHIGH * potency)
+
+//checked code correct to schema
+//Biocidic reduces pest level in tray
+/datum/chem_property/negative/biocidic/reaction_hydro_tray(obj/O, volume, potency)
+
+	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
+		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+
+		if(!tray.seed)
+			return
+		if(tray.weedlevel>0)
+			tray.pestlevel += -1*(potency*2)*volume
 
 /datum/chem_property/negative/paining
 	name = PROPERTY_PAINING
@@ -290,6 +300,8 @@
 		L.add_bleeding(I, TRUE)
 		L.wounds += I
 
+//checked code correct to schema
+//Hemorrhaging hurts health, increases mutation_mod of plant in tray
 /datum/chem_property/negative/hemorrhaging/reaction_hydro_tray(obj/O, volume, potency = 1)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -299,9 +311,6 @@
 			return
 		tray.plant_health += -1*(potency*2)*volume
 		tray.mutation_mod+= 0.2*(potency*2)*volume
-
-		tray.check_level_sanity()
-		tray.update_icon()
 
 /datum/chem_property/negative/hemorrhaging/reaction_mob(mob/M, method = TOUCH, volume, potency)
 	M.AddComponent(/datum/component/status_effect/healing_reduction, potency * volume * POTENCY_MULTIPLIER_VLOW) //deals brute DOT to humans, prevents healing for xenos
@@ -322,6 +331,8 @@
 /datum/chem_property/negative/carcinogenic/process_critical(mob/living/M, potency = 1)
 	M.take_limb_damage(POTENCY_MULTIPLIER_MEDIUM * potency)//Hyperactive apoptosis
 
+//checked code correct to schema
+//Carcinogenic adds toxins, increases mutation level of plant in tray
 /datum/chem_property/negative/carcinogenic/reaction_hydro_tray(obj/O, volume, potency = 1)
 
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
@@ -331,9 +342,6 @@
 			return
 		tray.toxins += 1.5*(potency*2)*volume
 		tray.mutation_level += 8*(potency*2)*volume + tray.mutation_mod
-
-		tray.check_level_sanity()
-		tray.update_icon()
 
 /datum/chem_property/negative/hepatotoxic
 	name = PROPERTY_HEPATOTOXIC

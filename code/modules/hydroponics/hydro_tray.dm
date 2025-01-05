@@ -33,6 +33,7 @@
 	var/toxins = 0  // Toxicity in the tray?
 	var/mutation_level = 0  // When it hits 100, the plant mutates.
 
+
 	// Mechanical concerns.
 	var/plant_health = 0  // Plant health.
 	var/lastproduce = 0 // Last time tray was harvested
@@ -44,8 +45,11 @@
 
 	// Seed details/line data.
 	var/datum/seed/seed = null // The currently planted seed
-	var/obj/structure/machinery/portable_atmospherics/hydroponics/h_tray = null
-	var/exception_check = FALSE
+
+	var/exception_check = FALSE // checks if a hydro chem was used in current process cycle
+	var/potency_counter = 0 // used in property/Excreting/reaction_hydro_tray and other potency increasing methods
+	var/repeat_harvest_counter = 0 // used in property/photosensative/reaction_hydro_tray to set repeat harvest on
+	var/production_time_counter = 0 // used in purpleplasma/rection_hydro_tray to reduce production time
 
 	// Reagent information for process(), consider moving this to a controller along
 	// with cycle information under 'mechanical concerns' at some point.
@@ -279,14 +283,18 @@ var/global/list/mutagenic_reagents = list(
 	update_icon()
 	return
 
-//Process reagents being input into the tray.
+//Process reagents being input to affect hydro tray or plany, taking reagent and volume
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/reaction_hydro_tray_exception(datum/reagent/R, reagent_total)
 	R.reaction_hydro_tray(src, reagent_total)
 
+//takes a reagent and process each chemical property to affect hydro tray or plant, taking reagent and volume
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/reaction_hydro_tray_properties(datum/reagent/R, reagent_total)
 	for(var/datum/chem_property/P in R.properties)
 		P.reaction_hydro_tray(src, reagent_total, (P.level)/2)
 
+//Root Change in code that everything pivots on, rewrote existing process_reagents completely to, instead of checkign hard coded lists, run process reaction_hydro_tray that is child of all reagent and property objects
+//Code maintains efficiency as if a legacy hydro chem is used, the code executes same effect as prior code version. reaction hydro_tray_properties will only run if reaction_hydro_tray_chemicals does not change exception_check to TRUE
+//runs reaction_hydro_tray for each reagent/property in chem buffer applyign changes to plant stats
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/process_reagents()
 
 	if(!reagents) return
@@ -297,8 +305,8 @@ var/global/list/mutagenic_reagents = list(
 	reagents.trans_to(temp_chem_holder, min(reagents.total_volume,rand(1,3)))
 
 	for(var/datum/reagent/R in temp_chem_holder.reagents.reagent_list)
-
 		var/reagent_total = temp_chem_holder.reagents.get_reagent_amount(R.id)
+
 		exception_check = FALSE
 		reaction_hydro_tray_exception(R,reagent_total)
 		if(!exception_check)
