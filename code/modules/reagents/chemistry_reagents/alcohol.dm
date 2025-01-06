@@ -64,25 +64,27 @@
 	boozepwr = 1
 	nutriment_factor = 1 * FOOD_METABOLISM
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * Beer modifies tray by reducing plant health, increases nutrilevel, water and flushes toxins
+ *
+ *  Beer modifies tray by reducing plant health by -0.05, increases nutrilevel by 0.25, water by 0.7 and flushes toxins
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/ethanol/beer/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.plant_health += -0.05*volume
-
-		tray.nutrilevel += 0.25*volume
-
-		var/water_added = 0
-		var/water_input = 0.7*volume
-		water_added += water_input
-		tray.waterlevel += water_input
-
-		tray.toxins -= floor(water_added/4)
-
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.plant_health += -0.05*volume
+	tray.nutrilevel += 0.25*volume
+	var/water_added = 0
+	var/water_input = 0.7*volume
+	water_added += water_input
+	tray.waterlevel += water_input
+	tray.toxins -= floor(water_added/4)
+	tray.exception_check = TRUE
 
 /datum/reagent/ethanol/beer/on_mob_life(mob/living/M)
 	. = ..()

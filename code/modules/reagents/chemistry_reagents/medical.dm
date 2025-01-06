@@ -25,16 +25,21 @@
 	chemclass = CHEM_CLASS_UNCOMMON
 	properties = list(PROPERTY_AIDING = 2)
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * Ryetalyn modifies tray by reducing mutation level by -8
+ *
+ * Ryetalyn modifies tray by reducing mutation level by -8
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/medical/ryetalyn/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.mutation_level += -8*volume + tray.mutation_mod
-
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.mutation_level += -8*volume + tray.mutation_mod
+	tray.exception_check = TRUE
 
 /datum/reagent/medical/paracetamol
 	name = "Paracetamol"
@@ -157,15 +162,21 @@
 	chemclass = CHEM_CLASS_COMMON
 	properties = list(PROPERTY_ANTITOXIC = 2, PROPERTY_ANTIHALLUCINOGENIC = 2)
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * Antitoxin modifies tray by reducing toxins by -2
+ *
+ * Antitoxin modifies tray by reducing toxins by -2
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/medical/anti_toxin/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.toxins += -2*volume
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.toxins += -2*volume
+	tray.exception_check = TRUE
 
 /datum/reagent/medical/adminordrazine //An OP chemical for admins
 	name = "Adminordrazine"
@@ -176,31 +187,32 @@
 	properties = list(PROPERTY_OMNIPOTENT = 2)
 	flags = REAGENT_TYPE_MEDICAL
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
-//excellent example of how to implement hydro_tray stat changes using reaction_hydro_tray
+/**
+ * Adminordrazine modifies tray broadly reducing all negatives, adding water and adding all posivive values
+ *
+ * Adminordrazine modifies tray broadly reducing pest and weeds by -5. increasing nutrilevel health, yield_mod and mutation_mod by 1,
+ * adding water by 1 and flushing toxins excellent example of how to broadly implenent stat changes
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/medical/adminordrazine/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.weedlevel += -5*volume
-		tray.pestlevel += -5*volume
-
-		tray.plant_health += 1*volume
-		tray.yield_mod += 1*volume
-		tray.mutation_mod += 1*volume
-
-		tray.nutrilevel += 1*volume
-
-		var/water_added = 0
-		var/water_input = 1*volume
-		water_added += water_input
-		tray.waterlevel += water_input
-
-		tray.toxins -= floor(water_added/4)
-
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.weedlevel += -5*volume
+	tray.pestlevel += -5*volume
+	tray.plant_health += 1*volume
+	tray.yield_mod += 1*volume
+	tray.mutation_mod += 1*volume
+	tray.nutrilevel += 1*volume
+	var/water_added = 0
+	var/water_input = 1*volume
+	water_added += water_input
+	tray.waterlevel += water_input
+	tray.toxins -= floor(water_added/4)
+	tray.exception_check = TRUE
 
 /datum/reagent/medical/thwei //OP yautja chem
 	name = "Thwei"
@@ -251,18 +263,22 @@
 	chemclass = CHEM_CLASS_UNCOMMON
 	properties = list(PROPERTY_ANTITOXIC = 1, PROPERTY_BIOCIDIC = 1)
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * Arithrazine modifies tray by reducing toxins by -1.5 and mutation level by -6
+ *
+ * Arithrazine modifies tray by reducing toxins by -1.5 and mutation level by -6
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/medical/arithrazine/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.toxins += -1.5*volume
-
-		tray.mutation_level += -6*volume + tray.mutation_mod
-
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.toxins += -1.5*volume
+	tray.mutation_level += -6*volume + tray.mutation_mod
+	tray.exception_check = TRUE
 
 /datum/reagent/medical/russianred
 	name = "Russian Red"

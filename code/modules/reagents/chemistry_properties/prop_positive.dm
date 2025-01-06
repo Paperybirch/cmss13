@@ -21,17 +21,22 @@
 /datum/chem_property/positive/antitoxic/process_critical(mob/living/M, potency = 1, delta_time)
 	M.drowsyness  = max(M.drowsyness, 30)
 
-//checked code correct to schema
-//Antitoxic reduces toxin level of plant in tray
+/**
+ * Antitoxic reduces toxin level
+ *
+ * Antitoxic property modifies tray toxins level by -1
+ * Calculates effect based on the volume and potency of current property, potency being level/2
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ * * potency = level/2 maininting as potency to conform to other values, though typially will be converted from level to potency back to level may want to fix
+ */
 /datum/chem_property/positive/antitoxic/reaction_hydro_tray(obj/O, volume, potency = 1)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-
-		if(!tray.seed)
-			return
-		if(tray.toxins > 0)
-			tray.toxins += -1*(potency*2)
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	if(tray.toxins > 0)
+		tray.toxins += -1*(potency*2)
 
 /datum/chem_property/positive/anticorrosive
 	name = PROPERTY_ANTICORROSIVE
@@ -836,31 +841,38 @@
 	to_chat(M, SPAN_WARNING("Your feel a horrible migraine!"))
 	M.apply_internal_damage(potency, "brain")
 
-//checked code correct to schema
-//Reagents with Photosensative are rapidly uptaken by the Chloryphl A of all studied plant species, replacing the complexed magesium ion and showing significant efficiency increases of the enyzme
-//This change even is transmitted to following generations, as the chloropasts sequester sufficient amounts of the reagent, that specimens 10 generations down still titers comparable to the exposed first generation plant
-//The resultant surplus of energy and carbohydrates speed up the plants fruiting cycle and minimize metabolic stress, enabling any plant to be harvested multiple times
-//Counter increases and rolls to set plant to repeat harvest, Higher levels have reduced negatives and faster counter increase. Consumes nutrients and grows weeds
+/**
+ * Photosensative slowly modifies the plant to become repeat harvest, at the cost of increased weeds and nutrient consumption
+ *
+ * Photosensative property increases counter until >100. then rolls between 0 and 2, if <2 mutation fails and counter is reduced. otherwise the seed is modified to become repeat harvest
+ * print statement to confirm succesful mutation. modifies tray weed level by 0.8 and nutrilevel by -0.8
+ * Calculates effect based on the volume and potency of current property, potency being level/2
+ * Fluff - "Reagents with Photosensative are rapidly uptaken by the Chloryphl A of all studied plant species, replacing the complexed magesium ion and showing significant efficiency increases of the enyzme
+ * This change even is transmitted to following generations, as the chloropasts sequester sufficient amounts of the reagent, that specimens 10 generations down still titers comparable to the exposed first generation plant
+ * The resultant surplus of energy and carbohydrates speed up the plants fruiting cycle and minimize metabolic stress, enabling any plant to be harvested multiple times
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ * * potency = level/2 maininting as potency to conform to other values, though typially will be converted from level to potency back to level may want to fix
+ */
 /datum/chem_property/positive/photosensative/reaction_hydro_tray(obj/O, volume, potency = 1)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	if(tray.seed.harvest_repeat == 1)
+		return
+	tray.weedlevel += 0.8*(10-(potency*2))*volume
+	tray.nutrilevel += -0.8*(10-(potency*2))*volume
+	tray.repeat_harvest_counter += 5*(potency*2)*volume
+	if (tray.repeat_harvest_counter >= 100)
+		if (rand(0,2) < 2)
+			tray.repeat_harvest_counter += -1*rand(20,50)
 			return
-		if(tray.seed.harvest_repeat == 1)
-			return
-		tray.weedlevel += 0.8*(10-(potency*2))*volume
-
-		tray.nutrilevel += -0.8*(10-(potency*2))*volume
-
-		tray.repeat_harvest_counter += 5*(potency*2)*volume
-
-		if (tray.repeat_harvest_counter >= 100 && rand(0,2) == 2)
-			var/turf/c_turf = get_turf(O)
-			tray.seed = tray.seed.diverge()
-			tray.seed.harvest_repeat = 1
-			c_turf.visible_message(SPAN_NOTICE("\The [tray.seed.display_name] begins to shimmer with a color out of space"))
-			tray.potency_counter = 0
+		var/turf/c_turf = get_turf(O)
+		tray.seed = tray.seed.diverge()
+		tray.seed.harvest_repeat = 1
+		c_turf.visible_message(SPAN_NOTICE("\The [tray.seed.display_name] begins to shimmer with a color out of space"))
+		tray.potency_counter = 0
 
 /datum/chem_property/positive/crystallization
 	name = PROPERTY_CRYSTALLIZATION
@@ -997,17 +1009,21 @@
 	M.apply_damage(0.5 * potency * delta_time, TOX)
 	M.apply_damage(1.5 * potency * delta_time, CLONE)
 
-//checked code correct to schema
-//Aiding reduces mutation_mod of plant in tray
+/**
+ * Aiding reduces mutation_mod
+ *
+ * Aiding modifies tray mutation_mod by -4
+ * Calculates effect based on the volume and potency of current property, potency being level/2
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ * * potency = level/2 maininting as potency to conform to other values, though typially will be converted from level to potency back to level may want to fix
+ */
 /datum/chem_property/positive/aiding/reaction_hydro_tray(obj/O, volume, potency = 1)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-
-		if(!tray.seed)
-			return
-		tray.mutation_mod += -4*(potency*2)*volume
-
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.mutation_mod += -4*(potency*2)*volume
 
 /datum/chem_property/positive/oxygenating
 	name = PROPERTY_OXYGENATING

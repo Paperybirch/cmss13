@@ -170,22 +170,26 @@
 	holder.remove_reagent("capsaicin", 10*REAGENTS_METABOLISM)
 	holder.remove_reagent("hotsauce", 10*REAGENTS_METABOLISM)
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * Milk modifies tray by increasing nutrilevel by 0.1, water by 0.9 and flushes toxins
+ *
+ * Milk modifies tray by increasing nutrilevel by 0.1, water by 0.9 and flushes toxins
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/drink/milk/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.nutrilevel += 0.1*volume
-
-		var/water_added = 0
-		var/water_input = 0.9*volume
-		water_added += water_input
-		tray.waterlevel += water_input
-
-		tray.toxins -= floor(water_added/4)
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.nutrilevel += 0.1*volume
+	var/water_added = 0
+	var/water_input = 0.9*volume
+	water_added += water_input
+	tray.waterlevel += water_input
+	tray.toxins -= floor(water_added/4)
+	tray.exception_check = TRUE
 
 /datum/reagent/drink/milk/soymilk
 	name = "Soy Milk"
@@ -293,26 +297,27 @@
 	adj_dizzy = -5
 	adj_drowsy = -3
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * Sodawater modifies tray by increasing plant health and nutrilevel by 0.1, water by 1 and flushes toxins
+ *
+ * Milk modifies tray by increasing nutrilevel by 0.1, water by 0.9 and flushes toxins
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/drink/cold/sodawater/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-
-		tray.plant_health += 0.1*volume
-
-		tray.nutrilevel += 0.1*volume
-
-		var/water_added = 0
-		var/water_input = 1*volume
-		water_added += water_input
-		tray.waterlevel += water_input
-
-		tray.toxins -= floor(water_added/4)
-
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.plant_health += 0.1*volume
+	tray.nutrilevel += 0.1*volume
+	var/water_added = 0
+	var/water_input = 1*volume
+	water_added += water_input
+	tray.waterlevel += water_input
+	tray.toxins -= floor(water_added/4)
+	tray.exception_check = TRUE
 
 /datum/reagent/drink/cold/grapesoda
 	name = "Grape Soda"

@@ -37,30 +37,34 @@
 /datum/chem_property/neutral/excreting/pre_process(mob/living/M)
 	return list(REAGENT_PURGE = level)
 
-//checked code correct to schema
-//Reagents with excreting speed up the plants metabolism, altering even phosphorylation of DNA producing inheritable changes, upregulating excretory pathways and increasing the chemicals its fruit yields
-//Counter Filling until >=100, then roll for potency increase. This is unhealthy reducing plant health, consumes nutrient, produces many toxins, and increases weeds
-//good example of how to use reaction_hydro_tray to modify the properties of the seed in tray
+/**
+ * Excreting increases counter and rolls to increase potency, costing plant health, nutrients and increasing toxins and weeds
+ *
+ * Excreting increases potency, using a counter to control increase speed. Then when the counter exceeds 100 a number is rolled between 0 and p.level, this is added to potency
+ * Adds 1.2 toxins, 1 weeds and consumes -0.25 nutrients
+ * Calculates effect based on the volume and potency of current property, potency being level/2
+ * lil bit of fluff: "Reagents with excreting speed up the plants metabolism, altering even phosphorylation of DNA producing inheritable changes,
+ * upregulating excretory pathways and increasing the chemicals its fruit yields"
+ * good example of how to use reaction_hydro_tray to modify the properties of the seed in tray
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ * * potency = level/2 maininting as potency to conform to other values, though typially will be converted from level to potency back to level may want to fix
+ */
 /datum/chem_property/neutral/excreting/reaction_hydro_tray(obj/O, volume, potency_prop = 1)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-
-		if(!tray.seed)
-			return
-		tray.toxins += 1.2*(potency_prop*2)*volume
-		tray.weedlevel += 1*(potency_prop*2)*volume
-
-		tray.nutrilevel += -0.25*(potency_prop*2)*volume
-
-		tray.potency_counter += 5*(potency_prop*2)*volume
-
-		if (tray.potency_counter >= 100 && rand(0,potency_prop*2) > 0)
-			var/turf/c_turf = get_turf(O)
-			tray.seed = tray.seed.diverge()
-			tray.seed.potency += rand(1,potency_prop*2)
-			c_turf.visible_message(SPAN_NOTICE("\The [tray.seed.display_name] rustles as its branches bow"))
-			tray.potency_counter = 0
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.toxins += 1.2*(potency_prop*2)*volume
+	tray.weedlevel += 1*(potency_prop*2)*volume
+	tray.nutrilevel += -0.25*(potency_prop*2)*volume
+	tray.potency_counter += 5*(potency_prop*2)*volume
+	if (tray.potency_counter >= 100 && rand(0,potency_prop*2) > 0)
+		var/turf/c_turf = get_turf(O)
+		tray.seed = tray.seed.diverge()
+		tray.seed.potency += rand(1,potency_prop*2)
+		c_turf.visible_message(SPAN_NOTICE("\The [tray.seed.display_name] rustles as its branches bow"))
+		tray.potency_counter = 0
 
 /datum/chem_property/neutral/nutritious
 	name = PROPERTY_NUTRITIOUS
@@ -88,20 +92,24 @@
 	holder.nutriment_factor += level
 	..()
 
-//checked code correct to schema
-//Nutritious Increases pest, weed, plant health and yield mod of plant in tray
+/**
+ * Nutritious adds weeds, pests, and increases health and yield_mod
+ *
+ * Nutritiousproperty modifies tray by increasing weed level by 0.5, pest level by 0.5, plant health by 0.5, yield mod by 0.05
+ * Calculates effect based on the volume and potency of current property, potency being level/2
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ * * potency = level/2 maininting as potency to conform to other values, though typially will be converted from level to potency back to level may want to fix
+ */
 /datum/chem_property/neutral/nutritious/reaction_hydro_tray(obj/O, volume, potency = 1)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-
-		if(!tray.seed)
-			return
-		tray.weedlevel += 0.5*(potency*2)*volume
-		tray.pestlevel += 0.5*(potency*2)*volume
-
-		tray.plant_health += 0.5*(potency*2)*volume
-		tray.yield_mod += 0.05*(potency*2)*volume
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.weedlevel += 0.5*(potency*2)*volume
+	tray.pestlevel += 0.5*(potency*2)*volume
+	tray.plant_health += 0.5*(potency*2)*volume
+	tray.yield_mod += 0.05*(potency*2)*volume
 
 /datum/chem_property/neutral/ketogenic
 	name = PROPERTY_KETOGENIC
@@ -367,23 +375,26 @@
 	to_chat(M, SPAN_WARNING("You feel like something is penetrating your skull!"))
 	M.apply_damage(0.5 * potency * delta_time, BRAIN) //Hair growing into brain
 
-//checked code correct to schema
-//Reagents with fluffing increase the yield of individual plants. However this drains alot of nutrients and water
+/**
+ * Fluffing adds yield mod and consumes nutrients and water
+ *
+ * Fluffing roperty modifies tray yield mod by 0.2, nutrilevel by -0.5 and water by -0.1
+ * Calculates effect based on the volume and potency of current property, potency being level/2
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ * * potency = level/2 maininting as potency to conform to other values, though typially will be converted from level to potency back to level may want to fix
+ */
 /datum/chem_property/neutral/fluffing/reaction_hydro_tray(obj/O, volume, potency = 1)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-
-		if(!tray.seed)
-			return
-		tray.yield_mod += 0.2*(potency*2)*volume
-
-		tray.nutrilevel += -0.5*(potency*2)*volume
-
-		var/water_added = 0
-		var/water_input = -0.1*(potency*2)*volume
-		water_added += water_input
-		tray.waterlevel += water_input
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.yield_mod += 0.2*(potency*2)*volume
+	tray.nutrilevel += -0.5*(potency*2)*volume
+	var/water_added = 0
+	var/water_input = -0.1*(potency*2)*volume
+	water_added += water_input
+	tray.waterlevel += water_input
 
 /datum/chem_property/neutral/allergenic
 	name = PROPERTY_ALLERGENIC

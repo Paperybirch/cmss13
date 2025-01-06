@@ -12,16 +12,21 @@
 	custom_metabolism = AMOUNT_PER_TIME(1, 20 SECONDS)
 	properties = list(PROPERTY_TOXIC = 1)// Toxins are really weak, but without being treated, last very long.
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * Toxin modifies tray toxins by 2
+ *
+ * Toxin modifies tray toxins by 2
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/toxin/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.toxins += 2*volume
-
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.toxins += 2*volume
+	tray.exception_check = TRUE
 
 /datum/reagent/toxin/hptoxin
 	name = "Toxin"
@@ -58,18 +63,22 @@
 	chemclass = CHEM_CLASS_UNCOMMON
 	properties = list(PROPERTY_CARCINOGENIC = 1)
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * Mutagen modifies tray toxins by 2.5 and mutation level by 15
+ *
+ * Mutagen modifies tray toxins by 2.5 and mutation level by 15
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/toxin/mutagen/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.toxins += 2.5*volume
-
-		tray.mutation_level += 15*volume + tray.mutation_mod
-
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.toxins += 2.5*volume
+	tray.mutation_level += 15*volume + tray.mutation_mod
+	tray.exception_check = TRUE
 
 /datum/reagent/toxin/phoron
 	name = "Phoron"
@@ -177,53 +186,66 @@
 	name = "EZ Nutrient"
 	id = "eznutrient"
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * eznutrient modifies tray nutrilevel by 1
+ *
+ * eznutrient modifies tray nutrilevel by 1
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/toxin/fertilizer/eznutrient/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.nutrilevel += 1*volume
-
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.nutrilevel += 1*volume
+	tray.exception_check = TRUE
 
 /datum/reagent/toxin/fertilizer/left4zed
 	name = "Left-4-Zed"
 	id = "left4zed"
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * left4zed modifies tray nutrilevel by 1 and mutation_mod by 0.2
+ *
+ * left4zed modifies tray nutrilevel by 1 and mutation_mod by 0.2
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/toxin/fertilizer/left4zed/reaction_hydro_tray(obj/O, volume)
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.mutation_mod += 0.2*volume
+	tray.nutrilevel += 1*volume
+	tray.exception_check = TRUE
 
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.mutation_mod += 0.2*volume
-
-		tray.nutrilevel += 1*volume
-
-		tray.exception_check = TRUE
-
-//Added fluffing trait to robust harvest, frankly a QOL choice to make fluffing guarenteed. Robust harvest is effective enough for yield boosting but I dislike spam clicking 30 10u cans into a tray
-//Feel free to remove properties fluffing add if disagree with choice
+///Added fluffing trait to robust harvest, frankly a QOL choice to make fluffing guarenteed. Robust harvest is effective enough for yield boosting but I dislike spam clicking 30 10u cans into a tray
+///Feel free to remove properties fluffing add if disagree with choice
 /datum/reagent/toxin/fertilizer/robustharvest
 	name = "Robust Harvest"
 	id = "robustharvest"
-	properties = list(PROPERTY_FLUFFING = 0.5)
+	properties = list(PROPERTY_FLUFFING = 1)
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * robustharvest modifies tray nutrilevel by 1 and yield_mod by 0.2
+ *
+ * robustharvest modifies tray nutrilevel by 1 and yield_mod by 0.2
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/toxin/fertilizer/robustharvest/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.yield_mod += 0.2*volume
-
-		tray.nutrilevel += 1*volume
-
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.yield_mod += 0.2*volume
+	tray.nutrilevel += 1*volume
+	tray.exception_check = TRUE
 
 /datum/reagent/toxin/dinitroaniline
 	name = "Dinitroaniline"
@@ -231,23 +253,25 @@
 	description = "Dinitroanilines are a class of chemical compounds used industrially in the production of pesticides and herbicides."
 	chemclass = CHEM_CLASS_UNCOMMON
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * dinitroaniline modifies tray toxins by 2, weedlevel by -6, pest by -3, health by -.5 and mutation_mod by .1
+ *
+ * dinitroaniline modifies tray toxins by 2, weedlevel by -6, pest by -3, health by -.5 and mutation_mod by .1
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/toxin/dinitroaniline/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.toxins += 2*volume
-		tray.weedlevel += -6*volume
-		tray.pestlevel += -3*volume
-
-		tray.plant_health += -0.5*volume
-
-		tray.mutation_mod += 0.1*volume
-
-		tray.exception_check = TRUE
-
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.toxins += 2*volume
+	tray.weedlevel += -6*volume
+	tray.pestlevel += -3*volume
+	tray.plant_health += -0.5*volume
+	tray.mutation_mod += 0.1*volume
+	tray.exception_check = TRUE
 
 /datum/reagent/toxin/plantbgone
 	name = "Plant-B-Gone"
@@ -257,20 +281,24 @@
 	color = "#49002E" // rgb: 73, 0, 46
 	properties = list(PROPERTY_TOXIC = 2)
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * plantBgone modifies tray toxins by 3, weedlevel by -8, health by -2 and mutation_mod by .2
+ *
+ * plantBgone modifies tray toxins by 3, weedlevel by -8, health by -2 and mutation_mod by .2
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/toxin/plantbgone/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.toxins += 3*volume
-		tray.weedlevel += -8*volume
-
-		tray.plant_health += -2*volume
-		tray.mutation_mod += 0.2*volume
-
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.toxins += 3*volume
+	tray.weedlevel += -8*volume
+	tray.plant_health += -2*volume
+	tray.mutation_mod += 0.2*volume
+	tray.exception_check = TRUE
 
 /datum/reagent/toxin/stoxin
 	name = "Soporific"
@@ -343,19 +371,23 @@
 	chemclass = CHEM_CLASS_BASIC
 	properties = list(PROPERTY_TOXIC = 1, PROPERTY_CORROSIVE = 3)
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * acid modifies tray toxins by 1.5, weedlevel by -2, health by -1
+ *
+ * acid modifies tray toxins by 1.5, weedlevel by -2, health by -1
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/toxin/acid/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.toxins += 1.5*volume
-		tray.weedlevel += -2*volume
-
-		tray.plant_health += -1*volume
-
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.toxins += 1.5*volume
+	tray.weedlevel += -2*volume
+	tray.plant_health += -1*volume
+	tray.exception_check = TRUE
 
 /datum/reagent/toxin/acid/polyacid
 	name = "Polytrinic acid"
@@ -368,19 +400,23 @@
 	chemclass = CHEM_CLASS_UNCOMMON
 	properties = list(PROPERTY_TOXIC = 2, PROPERTY_CORROSIVE = 3)
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * pacid modifies tray toxins by 3, weedlevel by -4, health by -2
+ *
+ * pacid modifies tray toxins by 3, weedlevel by -4, health by -2
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/toxin/acid/polyacid/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-		tray.toxins += 3*volume
-		tray.weedlevel += -4*volume
-
-		tray.plant_health += -2*volume
-
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.toxins += 3*volume
+	tray.weedlevel += -4*volume
+	tray.plant_health += -2*volume
+	tray.exception_check = TRUE
 
 /datum/reagent/toxin/formaldehyde
 	name = "Formaldehyde"

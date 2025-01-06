@@ -33,6 +33,18 @@
 	var/toxins = 0  // Toxicity in the tray?
 	var/mutation_level = 0  // When it hits 100, the plant mutates.
 
+	///Exotic functionality counters for reaction_hydro_tray
+	/// checks if a hydro chem was used in current process cycle
+	var/exception_check = FALSE
+	/// used in property/Excreting/reaction_hydro_tray and other potency increasing methods
+	var/potency_counter = 0
+	/// used in property/photosensative/reaction_hydro_tray to set repeat harvest on
+	var/repeat_harvest_counter = 0
+	/// used in purpleplasma/rection_hydro_tray to reduce production time
+	var/production_time_counter = 0
+	///used in darkacidic reaction_hydro tray to add chems to plant
+	var/chem_add_counter = 0
+
 
 	// Mechanical concerns.
 	var/plant_health = 0  // Plant health.
@@ -46,14 +58,10 @@
 	// Seed details/line data.
 	var/datum/seed/seed = null // The currently planted seed
 
-	var/exception_check = FALSE // checks if a hydro chem was used in current process cycle
-	var/potency_counter = 0 // used in property/Excreting/reaction_hydro_tray and other potency increasing methods
-	var/repeat_harvest_counter = 0 // used in property/photosensative/reaction_hydro_tray to set repeat harvest on
-	var/production_time_counter = 0 // used in purpleplasma/rection_hydro_tray to reduce production time
-
 	// Reagent information for process(), consider moving this to a controller along
 	// with cycle information under 'mechanical concerns' at some point.
 
+///unused list now that proc/reaction_hyrdo_tray is used but dont want to delete b/c contains all reagent information in one place
 var/global/list/toxic_reagents = list(
 	"anti_toxin" =  -2,
 	"arithrazine" = -1.5,
@@ -71,7 +79,7 @@ var/global/list/toxic_reagents = list(
 	"plantbgone" =   3,
 	"chlorine trifluoride" = 8
 	)
-
+///unused list now that proc/reaction_hyrdo_tray is used but dont want to delete b/c contains all reagent information in one place
 var/global/list/nutrient_reagents = list(
 	"milk" = 0.1,
 	"phosphorus" =   0.1,
@@ -86,7 +94,7 @@ var/global/list/nutrient_reagents = list(
 	"ammonia" =  2,
 	"diethylamine" = 3
 	)
-
+///unused list now that proc/reaction_hyrdo_tray is used but dont want to delete b/c contains all reagent information in one place
 var/global/list/weedkiller_reagents = list(
 	"plantbgone" =  -8,
 	"dinitroaniline" = -6,
@@ -98,14 +106,14 @@ var/global/list/weedkiller_reagents = list(
 	"phosphorus" =  -2,
 	"sugar" =    2
 	)
-
+///unused list now that proc/reaction_hyrdo_tray is used but dont want to delete b/c contains all reagent information in one place
 var/global/list/pestkiller_reagents = list(
 	"adminordrazine" = -5,
 	"dinitroaniline" = -3,
 	"diethylamine" =   -2,
 	"sugar" =    2
 	)
-
+///unused list now that proc/reaction_hyrdo_tray is used but dont want to delete b/c contains all reagent information in one place
 var/global/list/water_reagents = list(
 	"water" =    1,
 	"adminordrazine" =  1,
@@ -116,7 +124,7 @@ var/global/list/water_reagents = list(
 	"phosphorus" =  -0.5,
 	"sodawater" =    1,
 	)
-
+///unused list now that proc/reaction_hyrdo_tray is used but dont want to delete b/c contains all reagent information in one place
 // Beneficial reagents also have values for modifying yield_mod and mut_mod (in that order).
 var/global/list/beneficial_reagents = list(
 	"beer" =    list( -0.05, 0,   0   ),
@@ -136,9 +144,9 @@ var/global/list/beneficial_reagents = list(
 	"robustharvest" =  list(  0, 0.2, 0   ),
 	"left4zed" =    list(  0, 0,   0.2 )
 	)
-
-	// Mutagen list specifies minimum value for the mutation to take place, rather
-	// than a bound as the lists above specify.
+///unused list now that proc/reaction_hyrdo_tray is used but dont want to delete b/c contains all reagent information in one place
+// Mutagen list specifies minimum value for the mutation to take place, rather
+// than a bound as the lists above specify.
 var/global/list/mutagenic_reagents = list(
 	"ryetalyn" =  -8,
 	"arithrazine" = -6,
@@ -283,41 +291,32 @@ var/global/list/mutagenic_reagents = list(
 	update_icon()
 	return
 
-//Process reagents being input to affect hydro tray or plany, taking reagent and volume
-/obj/structure/machinery/portable_atmospherics/hydroponics/proc/reaction_hydro_tray_exception(datum/reagent/R, reagent_total)
-	R.reaction_hydro_tray(src, reagent_total)
-
-//takes a reagent and process each chemical property to affect hydro tray or plant, taking reagent and volume
-/obj/structure/machinery/portable_atmospherics/hydroponics/proc/reaction_hydro_tray_properties(datum/reagent/R, reagent_total)
-	for(var/datum/chem_property/P in R.properties)
-		P.reaction_hydro_tray(src, reagent_total, (P.level)/2)
-
-//Root Change in code that everything pivots on, rewrote existing process_reagents completely to, instead of checkign hard coded lists, run process reaction_hydro_tray that is child of all reagent and property objects
-//Code maintains efficiency as if a legacy hydro chem is used, the code executes same effect as prior code version. reaction hydro_tray_properties will only run if reaction_hydro_tray_chemicals does not change exception_check to TRUE
-//runs reaction_hydro_tray for each reagent/property in chem buffer applyign changes to plant stats
+/**
+ * Processes the reagents in hydrotray buffer, applying effects via reagent,and reagent property reaction_hydro_tray proc - Rewritten majorly
+ *
+ * Processing of reagents in hydrotray buffer, as part of larger hydro/process() has checks to stop unintended running. Creates a temp chem holder, sampling all chems, then chems are
+ * iterated through loop to run on each chem. Exception_check is set to false and used to control if the program continues to running property/reaction_hydro_tray for the current chem
+ * this is necessary because current botany chems, legacy chems, could not be adequatly modeled using just properties. This is due to many legacy chems having no properties. So to
+ * conserve current hydro function, each botany chem received a reagent/reaction_hydro_tray() applying the same effects as prior code, and setting exception_check to TRUE.
+ * If the reagent did not trip exception check scan through its properties and apply property.reaction_hydro_tray() for each. Then clear chem holder, check plant stats are sane
+ * and update icon
+ */
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/process_reagents()
-
-	if(!reagents) return
-
+	if(!reagents)
+		return
 	if(reagents.total_volume <= 0)
 		return
-
 	reagents.trans_to(temp_chem_holder, min(reagents.total_volume,rand(1,3)))
-
 	for(var/datum/reagent/R in temp_chem_holder.reagents.reagent_list)
 		var/reagent_total = temp_chem_holder.reagents.get_reagent_amount(R.id)
-
 		exception_check = FALSE
-		reaction_hydro_tray_exception(R,reagent_total)
+		R.reaction_hydro_tray(src,reagent_total)
 		if(!exception_check)
-			reaction_hydro_tray_properties(R,reagent_total)
-
+			for(var/datum/chem_property/P in R.properties)
+				P.reaction_hydro_tray(src, reagent_total, (P.level)/2)
 	temp_chem_holder.reagents.clear_reagents()
 	check_level_sanity()
 	update_icon()
-
-
-
 
 //Harvests the product of a plant.
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/harvest(mob/user)
@@ -343,6 +342,11 @@ var/global/list/mutagenic_reagents = list(
 		age = 0
 		sampled = 0
 		mutation_mod = 0
+		///resets these counters when the plant is harvested and removed from tray
+		potency_counter = 0
+		repeat_harvest_counter = 0
+		production_time_counter = 0
+		chem_add_counter = 0
 
 	check_level_sanity()
 	update_icon()
@@ -362,6 +366,11 @@ var/global/list/mutagenic_reagents = list(
 	age = 0
 	yield_mod = 0
 	mutation_mod = 0
+	///resets these counters when the plant is removed from tray
+	potency_counter = 0
+	repeat_harvest_counter = 0
+	production_time_counter = 0
+	chem_add_counter = 0
 
 	to_chat(user, SPAN_NOTICE("You remove the dead plant from [src]."))
 	check_level_sanity()

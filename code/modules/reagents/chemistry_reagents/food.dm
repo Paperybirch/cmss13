@@ -17,20 +17,23 @@
 	properties = list(PROPERTY_NEOGENETIC = 1, PROPERTY_NUTRITIOUS = 2, PROPERTY_HEMOGENIC = 1)
 	flags = REAGENT_SCANNABLE
 
-//Legacy Botany Chem, -confirmed same effect/values as prior hydro code
+/**
+ * Nutriment modifies tray by increasing plant health by .5 nutrilevel by 1 and yield mod by .1
+ *
+ * Nutriment modifies tray by increasing plant health by .5 nutrilevel by 1 and yield mod by .1
+ * tray.exception_check = TRUE, chem properties will not be considered by hydro_tray process_reagents
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/nutriment/reaction_hydro_tray(obj/O, volume)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-		if(!tray.seed)
-			return
-
-		tray.plant_health += 0.5*volume
-		tray.yield_mod += 0.1*volume
-
-		tray.nutrilevel += 1*volume
-
-		tray.exception_check = TRUE
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.plant_health += 0.5*volume
+	tray.yield_mod += 0.1*volume
+	tray.nutrilevel += 1*volume
+	tray.exception_check = TRUE
 
 /datum/reagent/nutriment/egg
 	name = "Egg"

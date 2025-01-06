@@ -126,7 +126,15 @@ GLOBAL_LIST_INIT(name2reagent, build_name2reagent())
 		P.reaction_turf(T, volume, potency)
 	return
 
-//Process which takes an object, a hydrotray typically, and volume of reagent in temp holder buffer. Used to apply botany related effects for any chemical hydrotray reservoir
+/**
+ * Process which takes an object, a hydrotray typically, and volume of reagent. Used to apply botany related effects to plants and tray.
+ *
+ * Base form of proc that allows a reagent to affect hydro tray and planted seed, called during the hydro_tray process_reagents(). For most cases, where you want to ignore the chems
+ * properties set tray.exception_check = TRUE.
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ */
 /datum/reagent/proc/reaction_hydro_tray(obj/O, volume)
 	return
 

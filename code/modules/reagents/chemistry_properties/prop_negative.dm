@@ -44,6 +44,7 @@
 /datum/chem_property/negative/toxic/process_critical(mob/living/M, potency = 1)
 	M.apply_damage(potency * POTENCY_MULTIPLIER_VHIGH, TOX)
 
+///missread code and thought this was an oddball function for hydro tray work, but i belive this is so toxic gas kills plants restored to current master code as of commit
 /datum/chem_property/negative/toxic/reaction_obj(obj/O, volume, potency = 1)
 	if(istype(O,/obj/effect/alien/weeds/))
 		var/obj/effect/alien/weeds/alien_weeds = O
@@ -55,18 +56,36 @@
 	if(istype(O,/obj/effect/plantsegment))
 		if(prob(50)) qdel(O)
 		return
-
-//checked code correct to schema
-//Toxic Hurts health, increases toxin level of plant in tray
-/datum/chem_property/negative/toxic/reaction_hydro_tray(obj/O, volume, potency = 1)
-
 	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
 		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
 
 		if(!tray.seed)
 			return
-		tray.health += -1.5*(potency*2)*volume
-		tray.toxins += 1.5*(potency*2)*volume
+		tray.health -= rand(30,50)
+		if(tray.pestlevel > 0)
+			tray.pestlevel -= 2
+		if(tray.weedlevel > 0)
+			tray.weedlevel -= 3
+		tray.toxins += 4
+		tray.check_level_sanity()
+		tray.update_icon()
+
+/**
+ * Toxic Hurts health, increases toxin level of plant in tray
+ *
+ * Toxic property reduces health by -1.5 and increases toxins by 1.5
+ * Calculates effect based on the volume and potency of current property, potency being level/2
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ * * potency = level/2 maininting as potency to conform to other values, though typially will be converted from level to potency back to level may want to fix
+ */
+/datum/chem_property/negative/toxic/reaction_hydro_tray(obj/O, volume, potency = 1)
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.health += -1.5*(potency*2)*volume
+	tray.toxins += 1.5*(potency*2)*volume
 
 /datum/chem_property/negative/toxic/reaction_mob(mob/living/M, method=TOUCH, volume, potency = 1)
 	if(!iscarbon(M))
@@ -161,17 +180,22 @@
 			to_chat(M, SPAN_WARNING("\The [O] melts."))
 		qdel(O)
 
-//checked code correct to schema
-//Corrosive kills weeds in tray
+/**
+ * Corrosive kills weeds in hydro tray
+ *
+ * Corrosive property reduces weeds by -1
+ * Calculates effect based on the volume and potency of current property, potency being level/2
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ * * potency = level/2 maininting as potency to conform to other values, though typially will be converted from level to potency back to level may want to fix
+ */
 /datum/chem_property/negative/corrosive/reaction_hydro_tray(obj/O, volume, potency)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-
-		if(!tray.seed)
-			return
-		if(tray.weedlevel>0)
-			tray.weedlevel += -1*(potency*2)*volume
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	if(tray.weedlevel>0)
+		tray.weedlevel += -1*(potency*2)*volume
 
 /datum/chem_property/negative/biocidic
 	name = PROPERTY_BIOCIDIC
@@ -191,17 +215,22 @@
 /datum/chem_property/negative/biocidic/process_critical(mob/living/M, potency = 1)
 	M.take_limb_damage(POTENCY_MULTIPLIER_VHIGH * potency)
 
-//checked code correct to schema
-//Biocidic reduces pest level in tray
+/**
+ * Biocidic kills pests in hydro tray
+ *
+ * Biocidic property reduces weeds by -1
+ * Calculates effect based on the volume and potency of current property, potency being level/2
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ * * potency = level/2 maininting as potency to conform to other values, though typially will be converted from level to potency back to level may want to fix
+ */
 /datum/chem_property/negative/biocidic/reaction_hydro_tray(obj/O, volume, potency)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-
-		if(!tray.seed)
-			return
-		if(tray.weedlevel>0)
-			tray.pestlevel += -1*(potency*2)*volume
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	if(tray.weedlevel>0)
+		tray.pestlevel += -1*(potency*2)*volume
 
 /datum/chem_property/negative/paining
 	name = PROPERTY_PAINING
@@ -300,17 +329,22 @@
 		L.add_bleeding(I, TRUE)
 		L.wounds += I
 
-//checked code correct to schema
-//Hemorrhaging hurts health, increases mutation_mod of plant in tray
+/**
+ * Hemorrhaging harms plant health and increases mutation_mod in hydro tray
+ *
+ * Hemorrahaging property reduces health by -1 and increases mutation_mod by 0.2
+ * Calculates effect based on the volume and potency of current property, potency being level/2
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ * * potency = level/2 maininting as potency to conform to other values, though typially will be converted from level to potency back to level may want to fix
+ */
 /datum/chem_property/negative/hemorrhaging/reaction_hydro_tray(obj/O, volume, potency = 1)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-
-		if(!tray.seed)
-			return
-		tray.plant_health += -1*(potency*2)*volume
-		tray.mutation_mod+= 0.2*(potency*2)*volume
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.plant_health += -1*(potency*2)*volume
+	tray.mutation_mod+= 0.2*(potency*2)*volume
 
 /datum/chem_property/negative/hemorrhaging/reaction_mob(mob/M, method = TOUCH, volume, potency)
 	M.AddComponent(/datum/component/status_effect/healing_reduction, potency * volume * POTENCY_MULTIPLIER_VLOW) //deals brute DOT to humans, prevents healing for xenos
@@ -331,17 +365,22 @@
 /datum/chem_property/negative/carcinogenic/process_critical(mob/living/M, potency = 1)
 	M.take_limb_damage(POTENCY_MULTIPLIER_MEDIUM * potency)//Hyperactive apoptosis
 
-//checked code correct to schema
-//Carcinogenic adds toxins, increases mutation level of plant in tray
+/**
+ * Carcinogenic adds toxins and mutation level in hydro tray
+ *
+ * Carcinogenic property increases toxins by 1.5 and mutation level by 8
+ * Calculates effect based on the volume and potency of current property, potency being level/2
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ * * potency = level/2 maininting as potency to conform to other values, though typially will be converted from level to potency back to level may want to fix
+ */
 /datum/chem_property/negative/carcinogenic/reaction_hydro_tray(obj/O, volume, potency = 1)
-
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-
-		if(!tray.seed)
-			return
-		tray.toxins += 1.5*(potency*2)*volume
-		tray.mutation_level += 8*(potency*2)*volume + tray.mutation_mod
+	var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
+	if(!tray.seed)
+		return
+	tray.toxins += 1.5*(potency*2)*volume
+	tray.mutation_level += 8*(potency*2)*volume + tray.mutation_mod
 
 /datum/chem_property/negative/hepatotoxic
 	name = PROPERTY_HEPATOTOXIC

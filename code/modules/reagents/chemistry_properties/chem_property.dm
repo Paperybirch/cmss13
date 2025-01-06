@@ -66,8 +66,17 @@
 /datum/chem_property/proc/reaction_obj(obj/O, volume, potency)
 	return
 
-//Process which takes an object, a hydrotray typically, volume of reagent in temp holder buffer and property potency. Used to apply botany related effects for any chemical hydrotray reservoir
-/datum/chem_property/proc/reaction_hydro_tray(obj/O, volume, potency)
+/**
+ * Process which takes an object, a hydrotray typically, volume of reagent and applies specific hydro tray and or plant effect based on proprty and level.
+ *
+ * Base form of proc that allows a reagent's property to affect hydro tray and planted seed, called during the hydro_tray process_reagents(). Calculates effect based on
+ * the volume and potency of current property, potency being level/2
+ * Arguments:
+ * * obj/O - typically hydrotray machine, which hydrotray and its planted seed will be afected
+ * * volume - volume of chem from tem_chem_holder small volume typically, <5u
+ * * potency = level/2 maininting as potency to conform to other values, though typially will be converted from level to potency back to level may want to fix
+ */
+/datum/chem_property/proc/reaction_hydro_tray(obj/O, volume, potency = 1)
 	return
 
 /datum/chem_property/proc/reaction_turf(turf/T, volume, potency)
@@ -108,6 +117,6 @@
 	if(category & PROPERTY_TYPE_METABOLITE)
 		text += "Metabolite "
 	if(category & PROPERTY_TYPE_ANOMALOUS)
-		text += "Anomalous "	"
+		text += "Anomalous "
 	return text
 
