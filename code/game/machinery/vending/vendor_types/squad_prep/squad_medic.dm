@@ -215,6 +215,7 @@ GLOBAL_LIST_INIT(cm_vending_clothing_medic, list(
 
 /obj/effect/essentials_set/medic
 	spawned_gear_list = list(
+		/obj/item/device/rx_requester,
 		/obj/item/bodybag/cryobag,
 		/obj/item/device/defibrillator,
 		/obj/item/storage/firstaid/adv,
