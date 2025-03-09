@@ -380,6 +380,22 @@
 	weedlevel =   max(0,min(weedlevel,10))
 	toxins =  max(0,min(toxins,10))
 
+	///Ensures increased nutrient and water consumption as yield_mod increases
+	if(yielf_mod>20)
+		seed_yield_mod = seed.diverge()
+		if(yield_mod>100)
+			seed_yield_mod.nutrient_consumption = max(2,seed_yield_mod.nutrient_consumption)
+			seed_yield_mod.water_consumption = max(8,seed_yield_mod.water_consumption)
+		elif(yield_mod>70)
+			seed_yield_mod.nutrient_consumption = max(1.5,seed_yield_mod.nutrient_consumption)
+			seed_yield_mod.water_consumption = max(6,seed_yield_mod.water_consumption)
+		elif(yield_mod>40)
+			seed_yield_mod.nutrient_consumption = max(1,seed_yield_mod.nutrient_consumption)
+			seed_yield_mod.water_consumption = max(5,seed_yield_mod.water_consumption)
+		elif(yield_mod>20)
+			seed_yield_mod.nutrient_consumption = max(.5,seed_yield_mod.nutrient_consumption)
+			seed_yield_mod.water_consumption = max(4,seed_yield_mod.water_consumption)
+
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/mutate_species()
 
 	var/previous_plant = seed.display_name

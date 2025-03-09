@@ -652,7 +652,7 @@
 	if(!processing_tray.seed)
 		return
 	processing_tray.plant_health += 0.5*volume
-	processing_tray.yield_mod += 0.1*volume
+	processing_tray.yield_mod += 0.03*volume
 	processing_tray.nutrilevel += 2*volume
 
 /datum/reagent/hexamine
@@ -685,7 +685,7 @@
 	if(!processing_tray.seed)
 		return
 	processing_tray.plant_health += 0.8*volume
-	processing_tray.yield_mod += 0.3*volume
+	processing_tray.yield_mod += 0.05*volume
 	processing_tray.nutrilevel += 2*volume
 
 /datum/reagent/blackgoo

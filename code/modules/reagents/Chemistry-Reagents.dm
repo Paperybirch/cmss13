@@ -127,7 +127,7 @@ GLOBAL_LIST_INIT(name2reagent, build_name2reagent())
 /datum/reagent/proc/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume = 1)
 	return
 
-	/datum/reagent/proc/reaction_turf(turf/T, volume)
+/datum/reagent/proc/reaction_turf(turf/T, volume)
 	for(var/datum/chem_property/P in properties)
 		var/potency = P.level * LEVEL_TO_POTENCY_MULTIPLIER
 		P.reaction_turf(T, volume, potency)

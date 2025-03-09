@@ -157,15 +157,23 @@
 	name = "Left-4-Zed"
 	id = "left4zed"
 
+///Gives Robust harvest yield amping as it used too and, fluffing property to scan
 /datum/reagent/toxin/fertilizer/robustharvest
 	name = "Robust Harvest"
 	id = "robustharvest"
+	properties = list(PROPERTY_FLUFFING = 1)
 
 /datum/reagent/toxin/dinitroaniline
 	name = "Dinitroaniline"
 	id = "dinitroaniline"
 	description = "Dinitroanilines are a class of chemical compounds used industrially in the production of pesticides and herbicides."
 	chemclass = CHEM_CLASS_UNCOMMON
+
+/datum/reagent/toxin/dinitroaniline/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
+	. = ..()
+	processing_tray.pestlevel += -3*volume
+	processing_tray.weedlevel += -6*volume		
+	processing_tray.toxins += 2*volume	
 
 /datum/reagent/toxin/plantbgone
 	name = "Plant-B-Gone"

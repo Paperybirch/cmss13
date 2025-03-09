@@ -46,14 +46,14 @@
 	. = ..()
 	if(!processing_tray.seed)
 		return
-	processing_tray.toxins += (potency*2)*volume
+	processing_tray.toxins += 1.5*(potency*2)*volume
 	processing_tray.weedlevel += 1*(potency*2)*volume
-	processing_tray.nutrilevel += -0.25*(potency*2)*volume
 	processing_tray.potency_counter += 5*(potency*2)*volume
 	if (processing_tray.potency_counter >= 100 && rand(0,potency*2) > 0)
 		var/turf/c_turf = get_turf(processing_tray)
 		processing_tray.seed = processing_tray.seed.diverge()
 		processing_tray.seed.potency += rand(1,potency*2)
+		processing_tray.seed.nutrient_consumption += .03*(potency*2)
 		c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] rustles as its branches bow"))
 		processing_tray.potency_counter = 0
 
@@ -363,7 +363,6 @@
 	if(!processing_tray.seed)
 		return
 	processing_tray.yield_mod += 0.2*(potency*2)*volume
-	processing_tray.nutrilevel += -0.5*(potency*2)*volume
 	var/water_added = 0
 	var/water_input = -0.1*(potency*2)*volume
 	water_added += water_input

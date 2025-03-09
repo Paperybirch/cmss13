@@ -26,7 +26,7 @@
 	if(!processing_tray.seed)
 		return
 	if(processing_tray.toxins > 0)
-		processing_tray.toxins += -1*(potency*2)
+		processing_tray.toxins += -1.5*(potency*2)
 
 /datum/chem_property/positive/anticorrosive
 	name = PROPERTY_ANTICORROSIVE
@@ -849,18 +849,17 @@
 	category = PROPERTY_TYPE_TOXICANT
 	max_level = 1
 
-/datum/chem_property/positive/photosensetive/process(mob/living/M, potency = 1)
+/datum/chem_property/positive/photosensitive/process(mob/living/M, potency = 1)
 	to_chat(M, SPAN_WARNING("Your feel a horrible migraine!"))
 	M.apply_internal_damage(potency, "brain")
 
-/datum/chem_property/positive/photosensetive/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
+/datum/chem_property/positive/photosensitive/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
 	. = ..()
 	if(!processing_tray.seed)
 		return
 	if(processing_tray.seed.harvest_repeat == 1)
 		return
-	processing_tray.weedlevel += 0.8*(10-(potency*2))*volume
-	processing_tray.nutrilevel += -0.6*(10-(potency*2))*volume
+	processing_tray.weedlevel += 0.4*(10-(potency*2))*volume
 	processing_tray.repeat_harvest_counter += 5*(potency*2)*volume
 	if (processing_tray.repeat_harvest_counter >= 100)
 		if (rand(0,2) < 2)
@@ -869,6 +868,7 @@
 		var/turf/c_turf = get_turf(processing_tray)
 		processing_tray.seed = processing_tray.seed.diverge()
 		processing_tray.seed.harvest_repeat = 1
+		processing_tray.seed.nutrient_consumption += .15*(10-(potency*2))
 		c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] begins to shimmer with a color out of space"))
 		processing_tray.potency_counter = 0
 
@@ -892,7 +892,6 @@
 	if(processing_tray.seed.harvest_repeat == 1)
 		return
 	processing_tray.weedlevel += 0.8*(10-(potency*2))*volume
-	processing_tray.nutrilevel += -0.8*(10-(potency*2))*volume
 	processing_tray.repeat_harvest_counter += 5*(potency*2)*volume
 	if (processing_tray.repeat_harvest_counter >= 100)
 		if (rand(0,2) < 2)
@@ -901,6 +900,7 @@
 		var/turf/c_turf = get_turf(processing_tray)
 		processing_tray.seed = processing_tray.seed.diverge()
 		processing_tray.seed.harvest_repeat = 1
+		processing_tray.seed.nutrient_consumption += .15*(10-(potency*2))
 		c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] begins to shimmer with a color out of space"))
 		processing_tray.potency_counter = 0
 
