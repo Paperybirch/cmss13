@@ -136,6 +136,10 @@
 		if(M.fire_stacks <= 0)
 			M.ExtinguishMob()
 
+/datum/reagent/water/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
+	. = ..()
+	processing_tray.waterlevel += 0.5*volume
+
 /datum/reagent/water/holywater
 	name = "Holy Water"
 	id = "holywater"
@@ -643,6 +647,14 @@
 	color = "#404030" // rgb: 64, 64, 48
 	chemclass = CHEM_CLASS_COMMON
 
+/datum/reagent/ammonia/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	processing_tray.plant_health += 0.5*volume
+	processing_tray.yield_mod += 0.1*volume
+	processing_tray.nutrilevel += 2*volume
+
 /datum/reagent/hexamine
 	name = "Hexamine"
 	id = "hexamine"
@@ -667,6 +679,14 @@
 	reagent_state = LIQUID
 	color = "#604030" // rgb: 96, 64, 48
 	chemclass = CHEM_CLASS_UNCOMMON
+
+/datum/reagent/diethylamine/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	processing_tray.plant_health += 0.8*volume
+	processing_tray.yield_mod += 0.3*volume
+	processing_tray.nutrilevel += 2*volume
 
 /datum/reagent/blackgoo
 	name = "Black goo"
