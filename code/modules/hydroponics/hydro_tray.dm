@@ -51,8 +51,8 @@
 	var/production_time_counter = 0
 	///used in darkacidic reaction_hydro tray to add chems to plant
 	var/chem_add_counter = 0
-	///if the plant is going to harvest itself once its ready
-	var/autoharvest = FALSE
+	///Adjust the time between plant cycles Min -140
+	var/metabolism_adjust = 0
 
 
 
@@ -89,9 +89,14 @@
 	// Update values every cycle rather than every process() tick.
 	if(force_update)
 		force_update = 0
-	else if(world.time < (lastcycle + cycledelay))
+	else if(world.time < (lastcycle + cycledelay + metabolism_adjust))
+		///Resets adjust
+		metabolism_adjust = 0
 		return
 	lastcycle = world.time
+
+	///Resets adjust
+	metabolism_adjust = 0
 
 	// Mutation level drops each main tick.
 	mutation_level -= rand(2,4)
@@ -194,13 +199,6 @@
 
 	if(prob(3))  // On each tick, there's a chance the pest population will increase
 		pestlevel += 0.1 * HYDRO_SPEED_MULTIPLIER
-
-	if(harvest && autoharvest)
-		animate(src, transform = matrix(rand(1,-1), rand(-0.5,0.5), MATRIX_TRANSLATE), time = 0.5, easing = EASE_IN)
-		animate(transform = matrix(rand(-0.5,0.5), rand(1,-1), MATRIX_TRANSLATE), time = 0.5)
-		animate(transform = matrix(0, 0, MATRIX_TRANSLATE), time = 0.5, easing = EASE_OUT)
-		visible_message(SPAN_NOTICE("[src] shakes itself in attempt to harvest its products"))
-		harvest(null, TRUE) //this is ok
 
 	check_level_sanity()
 	update_icon()
@@ -379,22 +377,24 @@
 	pestlevel =   max(0,min(pestlevel,10))
 	weedlevel =   max(0,min(weedlevel,10))
 	toxins =  max(0,min(toxins,10))
+	///Adjust the time between plant cycles Min -140
+	metabolism_adjust = 0
 
 	///Ensures increased nutrient and water consumption as yield_mod increases
-	if(yielf_mod>20)
-		seed_yield_mod = seed.diverge()
-		if(yield_mod>100)
-			seed_yield_mod.nutrient_consumption = max(2,seed_yield_mod.nutrient_consumption)
-			seed_yield_mod.water_consumption = max(8,seed_yield_mod.water_consumption)
-		elif(yield_mod>70)
-			seed_yield_mod.nutrient_consumption = max(1.5,seed_yield_mod.nutrient_consumption)
-			seed_yield_mod.water_consumption = max(6,seed_yield_mod.water_consumption)
-		elif(yield_mod>40)
-			seed_yield_mod.nutrient_consumption = max(1,seed_yield_mod.nutrient_consumption)
-			seed_yield_mod.water_consumption = max(5,seed_yield_mod.water_consumption)
-		elif(yield_mod>20)
-			seed_yield_mod.nutrient_consumption = max(.5,seed_yield_mod.nutrient_consumption)
-			seed_yield_mod.water_consumption = max(4,seed_yield_mod.water_consumption)
+	if(yield_mod>20)
+		seed = seed.diverge()
+		if(yield_mod>70)
+			seed.nutrient_consumption = max(7,seed.nutrient_consumption)
+			seed.water_consumption = max(25,seed.water_consumption)
+		else if(yield_mod>50)
+			seed.nutrient_consumption = max(5,seed.nutrient_consumption)
+			seed.water_consumption = max(20,seed.water_consumption)
+		else if(yield_mod>30)
+			seed.nutrient_consumption = max(2,seed.nutrient_consumption)
+			seed.water_consumption = max(14,seed.water_consumption)
+		else if(yield_mod>20)
+			seed.nutrient_consumption = max(1,seed.nutrient_consumption)
+			seed.water_consumption = max(6,seed.water_consumption)
 
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/mutate_species()
 
@@ -570,17 +570,6 @@
 		playsound(loc, 'sound/items/Ratchet.ogg', 25, 1)
 		anchored = !anchored
 		to_chat(user, "You [anchored ? "wrench" : "unwrench"] \the [src].")
-	else if(istype(O, /obj/item/research_upgrades/autoharvest))
-		if(!autoharvest)
-			to_chat(user, SPAN_NOTICE("You insert [O] into [src]."))
-			animate(src, transform = matrix(-1, 0.5, MATRIX_TRANSLATE), time = 0.5, easing = EASE_IN)
-			animate(transform = matrix(0.5, -1, MATRIX_TRANSLATE), time = 0.5)
-			animate(transform = matrix(0, 0, MATRIX_TRANSLATE), time = 0.5, easing = EASE_OUT)
-			autoharvest = TRUE
-			qdel(O)
-		else
-			to_chat(user, SPAN_WARNING("[src] is already capable of automatic harvesting."))
-			return
 
 /obj/structure/machinery/portable_atmospherics/hydroponics/get_examine_text(mob/user)
 	. = ..()

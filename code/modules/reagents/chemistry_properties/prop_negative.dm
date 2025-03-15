@@ -178,7 +178,7 @@
 		return
 	if(processing_tray.weedlevel > 0)
 		processing_tray.weedlevel += -1*(potency*2)*volume
-		processing_tray.plant_health += -.1*(potency*2)*volume
+		processing_tray.plant_health += -0.1*(potency*2)*volume
 
 
 /datum/chem_property/negative/biocidic
@@ -205,7 +205,7 @@
 		return
 	if(processing_tray.pestlevel > 0)
 		processing_tray.pestlevel += -1*(potency*2)*volume
-		processing_tray.plant_health += -.1*(potency*2)*volume
+		processing_tray.plant_health += -0.1*(potency*2)*volume
 
 /datum/chem_property/negative/paining
 	name = PROPERTY_PAINING
@@ -494,6 +494,13 @@
 /datum/chem_property/negative/hypermetabolic/update_reagent()
 	holder.custom_metabolism = holder.custom_metabolism * (1 + POTENCY_MULTIPLIER_VLOW * level)
 	..()
+
+///Rate of 10 ticks per level decreases time between plant cycles
+/datum/chem_property/negative/hypermetabolic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	processing_tray.metabolism_adjust = -20*potency
 
 /datum/chem_property/negative/addictive
 	name = PROPERTY_ADDICTIVE

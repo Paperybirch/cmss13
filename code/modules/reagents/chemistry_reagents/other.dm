@@ -72,6 +72,26 @@
 	objective_value = OBJECTIVE_HIGH_VALUE
 	properties = list(PROPERTY_CORROSIVE = 3)
 
+///Removes chems from a plant, and at final step replaces with xeno blood. chilling!
+/datum/reagent/blood/xeno_blood/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	processing_tray.toxins += 6*volume
+	processing_tray.plant_health += -2*volume
+	if(rand(1,10) == 1)
+		var/turf/c_turf = get_turf(O)
+		processing_tray.seed = processing_tray.seed.diverge()
+		if(length(processing_tray.seed.chems) > 1)
+			var/removed_chem = processing_tray.seed.chems[rand(1,length(processing_tray.seed.chems))]
+			processing_tray.seed.chems.Remove(removed_chem)
+			c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] Sizzles and Pops"))
+		if(length(processing_tray.seed.chems) <= 1)
+			if (processing_tray.seed.chems == list("xenoblood"))
+				return
+			processing_tray.seed.chems = list("xenoblood" = list(1,2))
+			c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name]'s sizzling sputters out, you smell [removed_chem]"))
+
 /datum/reagent/blood/xeno_blood/royal
 	name = "Dark Acidic Blood"
 	id = "xenobloodroyal"
@@ -79,6 +99,30 @@
 	chemclass = CHEM_CLASS_SPECIAL
 	objective_value = OBJECTIVE_EXTREME_VALUE
 	properties = list(PROPERTY_CORROSIVE = 6)
+
+///If we have done an Acidic blood reduction, we add chems to the plant from same list plant mutation uses
+/datum/reagent/blood/xeno_blood/royal/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	processing_tray.toxins += 10*volume
+	processing_tray.plant_health += -6*volume
+	processing_tray.chem_add_counter += 1*volume
+	if(processing_tray.chem_add_counter >= 10 && rand(1,10) < 6)
+		var/turf/c_turf = get_turf(O)
+		processing_tray.chem_add_counter += -10
+		processing_tray.seed = processing_tray.seed.diverge()
+		if(length(processing_tray.seed.chems) > 10)
+			return
+		if(processing_tray.seed.chems["xenoblood"])
+			var/new_chem = list(pick( prob(10);pick(GLOB.chemical_gen_classes_list["C1"]),\
+										prob(15);pick(GLOB.chemical_gen_classes_list["C2"]),\
+										prob(25);pick(GLOB.chemical_gen_classes_list["C3"]),\
+										prob(30);pick(GLOB.chemical_gen_classes_list["C4"]),\
+										prob(15);pick(GLOB.chemical_gen_classes_list["T1"]),\
+										prob(5);pick(GLOB.chemical_gen_classes_list["T2"])) = list(1,rand(2,3)))
+			processing_tray.seed.chems += new_chem
+			c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] flashes an erie green, you smell [new_chem]"))
 
 /datum/reagent/vaccine
 	//data must contain virus type
@@ -1065,6 +1109,23 @@
 	chemclass = CHEM_CLASS_SPECIAL
 	objective_value = OBJECTIVE_EXTREME_VALUE
 	properties = list(PROPERTY_BIOCIDIC = 2)
+
+///Reduces the production time of plants
+/datum/reagent/plasma/purple/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	processing_tray.pestlevel += 6*volume
+	processing_tray.nutrilevel += -5*volume
+	if(processing_tray.seed.production <= 1)
+		return
+	processing_tray.production_time_counter += volume
+	if (processing_tray.production_time_counter >= 60)
+		var/turf/c_turf = get_turf(O)
+		processing_tray.seed = tray.seed.diverge()
+		processing_tray.seed.production += -1
+		c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] bristles and sways towards you!"))
+		processing_tray.production_time_counter = 0
 
 /datum/reagent/plasma/royal
 	name = "Royal Plasma"

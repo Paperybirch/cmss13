@@ -140,6 +140,19 @@
 /datum/chem_property/positive/hemogenic/proc/handle_nutrition_loss(mob/living/M, potency = 1, delta_time)
 	M.nutrition = max(M.nutrition - potency, 0)
 
+//Chance to restore ability to take seed clippings
+/datum/chem_property/positive/hemogenic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	if(processing_tray.sampled > 0)
+		return
+	if(Rand(1,10) > 6)
+		processing_tray.sampled = 0
+		var/turf/c_turf = get_turf(O)
+		c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] Graft scar has healed!"))
+
+
 /datum/chem_property/positive/hemogenic/predator
 	name = PROPERTY_YAUTJA_HEMOGENIC
 	code = "YHM"
@@ -285,6 +298,8 @@
 
 /datum/chem_property/positive/hepatopeutic/process_critical(mob/living/M, potency = 1, delta_time)
 	M.apply_damage(2.5 * potency * delta_time, TOX)
+
+
 
 /datum/chem_property/positive/nephropeutic
 	name = PROPERTY_NEPHROPEUTIC
@@ -868,7 +883,7 @@
 		var/turf/c_turf = get_turf(processing_tray)
 		processing_tray.seed = processing_tray.seed.diverge()
 		processing_tray.seed.harvest_repeat = 1
-		processing_tray.seed.nutrient_consumption += .15*(10-(potency*2))
+		processing_tray.seed.nutrient_consumption += 0.15*(10-(potency*2))
 		c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] begins to shimmer with a color out of space"))
 		processing_tray.potency_counter = 0
 
@@ -900,7 +915,7 @@
 		var/turf/c_turf = get_turf(processing_tray)
 		processing_tray.seed = processing_tray.seed.diverge()
 		processing_tray.seed.harvest_repeat = 1
-		processing_tray.seed.nutrient_consumption += .15*(10-(potency*2))
+		processing_tray.seed.nutrient_consumption += 0.15*(10-(potency*2))
 		c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] begins to shimmer with a color out of space"))
 		processing_tray.potency_counter = 0
 

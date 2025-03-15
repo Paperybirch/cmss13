@@ -147,15 +147,26 @@
 	description = "Industrial grade inorganic plant fertilizer."
 	reagent_state = LIQUID
 	color = "#664330" // rgb: 102, 67, 48
-	properties = list(PROPERTY_TOXIC = 0.5)
+	properties = list(PROPERTY_BIOCIDIC = 0.5)
 
 /datum/reagent/toxin/fertilizer/eznutrient
 	name = "EZ Nutrient"
 	id = "eznutrient"
 
+///ez nutrilevel for plants
+/datum/reagent/toxin/fertilizer/eznutrient/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
+	. = ..()
+	processing_tray.nutrilevel += 1*volume
+
 /datum/reagent/toxin/fertilizer/left4zed
 	name = "Left-4-Zed"
 	id = "left4zed"
+
+///Mutation mod and nutrilevel for plants
+/datum/reagent/toxin/fertilizer/left4zed/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
+	. = ..()
+	processing_tray.nutrilevel += 1*volume
+	processing_tray.mutation_mod += 0.2*volume
 
 ///Gives Robust harvest yield amping as it used too and, fluffing property to scan
 /datum/reagent/toxin/fertilizer/robustharvest
@@ -169,19 +180,21 @@
 	description = "Dinitroanilines are a class of chemical compounds used industrially in the production of pesticides and herbicides."
 	chemclass = CHEM_CLASS_UNCOMMON
 
+///Lowers weeds n pests increases toxins
 /datum/reagent/toxin/dinitroaniline/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
 	. = ..()
 	processing_tray.pestlevel += -3*volume
-	processing_tray.weedlevel += -6*volume		
-	processing_tray.toxins += 2*volume	
+	processing_tray.weedlevel += -6*volume
+	processing_tray.toxins += 2*volume
 
+///PLant B Gone toxic damage and lowers weeds in plants
 /datum/reagent/toxin/plantbgone
 	name = "Plant-B-Gone"
 	id = "plantbgone"
 	description = "A harmful toxic mixture used to kill plantlife. Very toxic to animals."
 	reagent_state = LIQUID
 	color = "#49002E" // rgb: 73, 0, 46
-	properties = list(PROPERTY_TOXIC = 2)
+	properties = list(PROPERTY_TOXIC = 2, PROPERTY_CORROSIVE = 4)
 
 /datum/reagent/toxin/stoxin
 	name = "Soporific"
