@@ -53,6 +53,8 @@
 	var/chem_add_counter = 0
 	///Adjust the time between plant cycles Min -140
 	var/metabolism_adjust = 0
+	///Initialize()
+	var/mutation_cancel = []
 
 
 
@@ -360,7 +362,7 @@
 	// harvested yet and it's safe to assume it's restricted to this tray.
 	if(!isnull(GLOB.seed_types[seed.name]))
 		seed = seed.diverge()
-	seed.mutate(severity ,get_turf(src), mutation_level)
+	seed.mutate(severity ,get_turf(src), mutation_level, mutation_cancel)
 	return
 
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/check_level_sanity()

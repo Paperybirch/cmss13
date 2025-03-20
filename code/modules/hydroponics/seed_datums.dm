@@ -317,7 +317,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	return pick(mutants)
 
 //Mutates the plant overall (randomly).
-/datum/seed/proc/mutate(degree, turf/source_turf)
+/datum/seed/proc/mutate(degree, turf/source_turf, mutation_cancel)
 
 	if(!degree || immutable > 0)
 		return
@@ -327,7 +327,12 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	//This looks like shit, but it's a lot easier to read/change this way.
 	var/total_mutations = rand(1,1+degree)
 	for(var/i = 0;i<total_mutations;i++)
-		switch(rand(0,14))
+
+		///cancels out mutations
+		var/mut_number = rand(0,14)
+		if(mutation_cancel[mut_number])
+			return
+		switch(mut_number)
 			if(0) //Plant cancer!
 				lifespan = max(0,lifespan-rand(1,5))
 				endurance = max(0,endurance-rand(10,20))
@@ -391,7 +396,8 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 											prob(5);pick(GLOB.chemical_gen_classes_list["T2"])) = list(1,rand(1,2)))
 				chems += new_chem
 
-
+	///reset mutation_cancel for next cycle
+	mutation_cancel = []
 	return
 
 //Mutates a specific trait/set of traits.
