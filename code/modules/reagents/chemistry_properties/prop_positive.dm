@@ -147,7 +147,7 @@
 		return
 	if(processing_tray.sampled > 0)
 		return
-	if(Rand(1,10) > 6)
+	if(Rand(1,10) < 6)
 		processing_tray.sampled = 0
 		var/turf/c_turf = get_turf(O)
 		c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] Graft scar has healed!"))
