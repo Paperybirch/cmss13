@@ -317,7 +317,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	return pick(mutants)
 
 //Mutates the plant overall (randomly).
-/datum/seed/proc/mutate(degree, turf/source_turf, mutation_cancel)
+/datum/seed/proc/mutate(degree, turf/source_turf, list/mutation_cancel)
 
 	if(!degree || immutable > 0)
 		return
@@ -330,7 +330,11 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 
 		///cancels out mutations
 		var/mut_number = rand(0,14)
-		if(mutation_cancel[mut_number])
+		var/mut_number_string = num2text(mut_number)
+		mutation_cancel = list("0","1","2","3","4","5","6","7")
+		if(mutation_cancel[mut_number_string])
+			source_turf.visible_message(SPAN_DANGER("\The [mut_number] blocked mutation"))
+			i = i-1
 			return
 		switch(mut_number)
 			if(0) //Plant cancer!
@@ -397,7 +401,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 				chems += new_chem
 
 	///reset mutation_cancel for next cycle
-	mutation_cancel = []
+	mutation_cancel = list()
 	return
 
 //Mutates a specific trait/set of traits.

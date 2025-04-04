@@ -54,7 +54,7 @@
 	///Adjust the time between plant cycles Min -140
 	var/metabolism_adjust = 0
 	///Initialize()
-	var/mutation_cancel = []
+	var/list/mutation_cancel = list()
 
 
 

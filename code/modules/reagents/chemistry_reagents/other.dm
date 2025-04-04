@@ -80,12 +80,12 @@
 	processing_tray.toxins += 6*volume
 	processing_tray.plant_health += -2*volume
 	if(rand(1,10) == 1)
-		var/turf/c_turf = get_turf(O)
+		var/turf/c_turf = get_turf(processing_tray)
+		var/removed_chem = processing_tray.seed.chems[rand(1,length(processing_tray.seed.chems))]
 		processing_tray.seed = processing_tray.seed.diverge()
 		if(length(processing_tray.seed.chems) > 1)
-			var/removed_chem = processing_tray.seed.chems[rand(1,length(processing_tray.seed.chems))]
 			processing_tray.seed.chems.Remove(removed_chem)
-			c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] Sizzles and Pops"))
+			c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] Sizzles and Pops, you smell [removed_chem]"))
 		if(length(processing_tray.seed.chems) <= 1)
 			if (processing_tray.seed.chems == list("xenoblood"))
 				return
@@ -109,7 +109,7 @@
 	processing_tray.plant_health += -6*volume
 	processing_tray.chem_add_counter += 1*volume
 	if(processing_tray.chem_add_counter >= 10 && rand(1,10) < 6)
-		var/turf/c_turf = get_turf(O)
+		var/turf/c_turf = get_turf(processing_tray)
 		processing_tray.chem_add_counter += -10
 		processing_tray.seed = processing_tray.seed.diverge()
 		if(length(processing_tray.seed.chems) > 10)
@@ -1121,8 +1121,8 @@
 		return
 	processing_tray.production_time_counter += volume
 	if (processing_tray.production_time_counter >= 60)
-		var/turf/c_turf = get_turf(O)
-		processing_tray.seed = tray.seed.diverge()
+		var/turf/c_turf = get_turf(processing_tray)
+		processing_tray.seed = processing_tray.seed.diverge()
 		processing_tray.seed.production += -1
 		c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] bristles and sways towards you!"))
 		processing_tray.production_time_counter = 0
