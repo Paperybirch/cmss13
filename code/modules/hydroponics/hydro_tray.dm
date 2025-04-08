@@ -53,14 +53,26 @@
 	var/chem_add_counter = 0
 	///Adjust the time between plant cycles Min -140
 	var/metabolism_adjust = 0
-	///Initialize()
-	var/list/mutation_cancel = list()
-
-
+	///Initialize() 13 potential slots to block corresponding to seed/proc/mutate and hydroponics/proc/mutate
+	var/list/mutation_cancel = list(
+		"Plant Cancer" = 5,
+		"Gluttony" = 5,
+		"Endurance" = 5,
+		"Light Tolerance" = 5,
+		"Toxin Tolerance" = 5,
+		"Weed Tolerance" = 5,
+		"Production" = 5,
+		"Lifespan" = 5,
+		"Potency" = 5,
+		"Maturity" = 5,
+		"Bioluminecence" = 5,
+		"Flowers" = 0,
+		"New Chems" = 0,
+		"Mutate Species" = 1,
+		)
 
 	// Reagent information for process(), consider moving this to a controller along
 	// with cycle information under 'mechanical concerns' at some point.
-
 
 /obj/structure/machinery/portable_atmospherics/hydroponics/Initialize()
 	. = ..()
@@ -352,8 +364,8 @@
 	if(!seed)
 		return
 
-	// Check if we should even bother working on the current seed datum.
-	if(LAZYLEN(seed.mutants) && severity > 1)
+	// Check if we should even bother working on the current seed datum. Mutation_cancel
+	if(LAZYLEN(seed.mutants) && severity > 1 && mutation_cancel["Mutate Species"] == 0)
 		mutate_species()
 		return
 
@@ -362,7 +374,7 @@
 	// harvested yet and it's safe to assume it's restricted to this tray.
 	if(!isnull(GLOB.seed_types[seed.name]))
 		seed = seed.diverge()
-	seed.mutate(severity ,get_turf(src), mutation_level, mutation_cancel)
+	seed.mutate(severity ,get_turf(src), src)
 	return
 
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/check_level_sanity()

@@ -317,7 +317,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	return pick(mutants)
 
 //Mutates the plant overall (randomly).
-/datum/seed/proc/mutate(degree, turf/source_turf, list/mutation_cancel)
+/datum/seed/proc/mutate(degree, turf/source_turf, obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray)
 
 	if(!degree || immutable > 0)
 		return
@@ -330,12 +330,14 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 
 		///cancels out mutations
 		var/mut_number = rand(0,14)
-		var/mut_number_string = num2text(mut_number)
-		mutation_cancel = list("0","1","2","3","4","5","6","7")
-		if(mutation_cancel[mut_number_string])
-			source_turf.visible_message(SPAN_DANGER("\The [mut_number] blocked mutation"))
-			i = i-1
-			return
+		if(processing_tray.mutation_cancel[processing_tray.mutation_cancel[mut_number]]>0)
+			source_turf.visible_message(SPAN_DANGER("[mut_number] blocked mutation"))
+			//If our mutation cancel is strong enough, property level 4+, we keep rerolling until an unblocked mutation
+			if(processing_tray.mutation_cancel[processing_tray.mutation_cancel[mut_number]]>3)
+				i = i-1
+			else
+				return
+			continue
 		switch(mut_number)
 			if(0) //Plant cancer!
 				lifespan = max(0,lifespan-rand(1,5))
@@ -401,7 +403,22 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 				chems += new_chem
 
 	///reset mutation_cancel for next cycle
-	mutation_cancel = list()
+	processing_tray.mutation_cancel = list(
+		"Plant Cancer" =0,
+		"Gluttony" = 0,
+		"Endurance" = 0,
+		"Light Tolerance" = 0,
+		"Toxin Tolerance" = 0,
+		"Weed Tolerance" = 0,
+		"Production" = 0,
+		"Lifespan" = 0,
+		"Potency" = 0,
+		"Maturity" = 0,
+		"Bioluminecence" = 0,
+		"Flowers" = 0,
+		"New Chems" = 0,
+		"Mutate Species" = 0,
+		)
 	return
 
 //Mutates a specific trait/set of traits.
