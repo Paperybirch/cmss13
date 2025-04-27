@@ -196,11 +196,11 @@ GLOBAL_LIST_INIT(name2reagent, build_name2reagent())
 		if(flags & REAGENT_CANNOT_OVERDOSE)
 			continue
 		if(overdose && volume > overdose)
-				P.process_overdose(M, potency, delta_time)
-				if(overdose_critical && volume > overdose_critical)
-					P.process_critical(M, potency, delta_time)
-				var/overdose_message = "[istype(src, /datum/reagent/generated) ? "custom chemical" : initial(name)] overdose"
-				M.last_damage_data = create_cause_data(overdose_message, last_source_mob?.resolve())
+			P.process_overdose(M, potency, delta_time)
+			if(overdose_critical && volume > overdose_critical)
+				P.process_critical(M, potency, delta_time)
+			var/overdose_message = "[istype(src, /datum/reagent/generated) ? "custom chemical" : initial(name)] overdose"
+			M.last_damage_data = create_cause_data(overdose_message, last_source_mob?.resolve())
 
 	if(mods[REAGENT_PURGE])
 		holder.remove_all_type(/datum/reagent,mods[REAGENT_PURGE] * delta_time)
