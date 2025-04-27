@@ -78,6 +78,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	var/list/chems  // Chemicals that plant produces in products/injects into victim.
 	var/list/consume_gasses // The plant will absorb these gasses during its life.
 	var/list/exude_gasses   // The plant will exude these gasses during its life.
+	var/list/chems_special  // Chemicals to be found after mutating the chemical.
 
 	//Tolerances.
 	var/requires_nutrients = 1   // The plant can starve.
@@ -199,16 +200,6 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	if(prob(20))
 		harvest_repeat = 1
 
-	if(prob(5))
-		consume_gasses = list()
-		var/gas = pick("oxygen","nitrogen","phoron","carbon_dioxide")
-		consume_gasses[gas] = rand(3,9)
-
-	if(prob(5))
-		exude_gasses = list()
-		var/gas = pick("oxygen","nitrogen","phoron","carbon_dioxide")
-		exude_gasses[gas] = rand(3,9)
-
 	chems = list()
 	if(prob(80))
 		chems["nutriment"] = list(rand(1,10),rand(10,20))
@@ -316,8 +307,9 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 		return 0
 	return pick(mutants)
 
-//Mutates the plant overall (randomly).
-/datum/seed/proc/mutate(degree, turf/source_turf, obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray)
+//Mutates the plant overall (randomly). Now with mutation controll, generating a list of valid numbers to roll
+//Changing the third parameter from mutation_level to the tray itself and generating mutation_level off of it, needed it to access
+/datum/seed/proc/mutate(degree, turf/source_turf, mutation_level, list/mutation_controller)
 
 	if(!degree || immutable > 0)
 		return
@@ -326,26 +318,27 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 
 	//This looks like shit, but it's a lot easier to read/change this way.
 	var/total_mutations = rand(1,1+degree)
-	var/mutation_controller = processing_tray.mutation_controller
 	var/list/allowed_mutations[]
 
 	//Generates list of what mutation outcomes are allowed after considering mutation cancel and mutation enable effects
 	for(var/c=1; c<length(mutation_controller); c++)
 		var/mut_name = mutation_controller[c]
 		var/mutation_enable_check = FALSE
+		//Mutation enablers, values >0 set just those
 		if(mutation_controller[mut_name] > 0)
 			allowed_mutations += list(c)
 			mutation_enable_check = TRUE
+		//level 1 mutation cancellers can still be rolled, blocking mutation but wasting it as well, stored as negative
 		if((mutation_controller[mut_name] == 0 || mutation_controller[mut_name] == -1) && mutation_enable_check == FALSE )
 			if(mutation_controller[mut_name] == -1)
 				allowed_mutations += list(-c)
 				return
 			allowed_mutations += list(c)
 
-	for(var/i = 0;i<total_mutations;i++)
+	for(var/i in 0 to total_mutations+max(0, round(mutation_level/50)))
 		var/mut_number = allowed_mutations[rand(1,length(allowed_mutations))]
-		//Low level mutation cancels any mutation
-		if(mut_number < 0)
+		//Low level mutation stored as negative value cancels any mutation
+		if(mut_number < 1)
 			return
 
 		switch(mut_number)
@@ -404,13 +397,14 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 					else
 						source_turf.visible_message(SPAN_NOTICE("\The [display_name]'s flowers wither and fall off."))
 			else //New chems! (20% chance)
-				var/new_chem = list(pick( prob(10);pick(GLOB.chemical_gen_classes_list["C1"]),
-											prob(15);pick(GLOB.chemical_gen_classes_list["C2"]),\
-											prob(25);pick(GLOB.chemical_gen_classes_list["C3"]),\
-											prob(30);pick(GLOB.chemical_gen_classes_list["C4"]),\
-											prob(15);pick(GLOB.chemical_gen_classes_list["T1"]),\
-											prob(5);pick(GLOB.chemical_gen_classes_list["T2"])) = list(1,rand(1,2)))
-				chems += new_chem
+			var/chem_to_add = list(pick( prob(10);pick(GLOB.chemical_gen_classes_list["C1"]),
+											prob(15);pick(GLOB.chemical_gen_classes_list["C2"]),
+											prob(25);pick(GLOB.chemical_gen_classes_list["C3"]),
+											prob(30);pick(GLOB.chemical_gen_classes_list["C4"]),
+											) = list(1,rand(1,2)))
+				if(prob(40) && chems_special)
+					chem_to_add = list(pick(chems_special) = list(7,rand(5,8)))
+				chems += chem_to_add
 
 	//reset mutation_controller for next cycle
 	for(var/j = 1; j<=length(mutation_controller); j++)
@@ -607,19 +601,19 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	return (P ? P : 0)
 
 //Place the plant products at the feet of the user.
-/datum/seed/proc/harvest(mob/user, yield_mod, harvest_sample)
+/datum/seed/proc/harvest(mob/user, yield_mod, harvest_sample, autoharvest, obj/structure/autoharvesting_tray)
 
-	if(!user)
+	if(!user && !autoharvest)
 		return
 
 	var/got_product
 	if(LAZYLEN(products) && yield > 0)
 		got_product = 1
-
 	if(!got_product && !harvest_sample)
+		if(!autoharvest)
 		to_chat(user, SPAN_DANGER("You fail to harvest anything useful."))
+		return
 	else
-		to_chat(user, "You [harvest_sample ? "take a sample" : "harvest"] from the [display_name].")
 
 		//This may be a new line. Update the global if it is.
 		if(name == "new line" || !(name in GLOB.seed_types))
@@ -644,7 +638,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 
 		for(var/i = 0;i<total_yield;i++)
 			var/product_type = pick(products)
-			var/obj/item/product = new product_type(get_turf(user))
+			var/obj/item/product = new product_type(get_turf(autoharvest ? autoharvesting_tray : user))
 			if(mysterious)
 				product.name += "?"
 				product.desc += " On second thought, something about this one looks strange."
@@ -663,6 +657,8 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 			else if(istype(product,/obj/item/grown))
 				var/obj/item/grown/current_product = product
 				current_product.plantname = name
+		if(!autoharvest)
+			to_chat(user, "You [harvest_sample ? "take a sample" : "harvest"] from the [display_name].")
 
 
 // When the seed in this machine mutates/is modified, the tray seed value
@@ -680,13 +676,18 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	new_seed.roundstart = 0
 
 	//Copy over everything else.
-	if(products)    new_seed.products = products.Copy()
+	if(products)
+		new_seed.products = products.Copy()
 	if(mutants)
 		new_seed.mutants = mutants.Copy()
-	if(chems)   new_seed.chems = chems.Copy()
+	if(chems)
+		new_seed.chems = chems.Copy()
+	if(chems_special)
+		new_seed.chems_special = chems_special.Copy()
 	if(consume_gasses)
 		new_seed.consume_gasses = consume_gasses.Copy()
-	if(exude_gasses)   new_seed.exude_gasses = exude_gasses.Copy()
+	if(exude_gasses)
+		new_seed.exude_gasses = exude_gasses.Copy()
 
 	new_seed.seed_name = "[(roundstart ? "[(modified ? "modified" : "mutant")] " : "")][seed_name]"
 	new_seed.display_name =  "[(roundstart ? "[(modified ? "modified" : "mutant")] " : "")][display_name]"
@@ -767,7 +768,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	seed_name = "berry"
 	display_name = "berry bush"
 	products = list(/obj/item/reagent_container/food/snacks/grown/berries)
-	mutants = list("glowberries","poisonberries")
+	mutants = list("glowberries","poisonberries","deathberries")
 	packet_icon = "seed-berry"
 	plant_icon = "berry"
 	harvest_repeat = 1
@@ -800,9 +801,10 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	seed_name = "poison berry"
 	display_name = "poison berry bush"
 	products = list(/obj/item/reagent_container/food/snacks/grown/poisonberries)
-	mutants = list("deathberries")
+	mutants = null
 	packet_icon = "seed-poisonberry"
 	plant_icon = "poisonberry"
+	chems_special = list("thymol")
 	chems = list("fruit" = list(1), "toxin" = list(3,5))
 
 /datum/seed/berry/poison/death
@@ -813,7 +815,8 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	products = list(/obj/item/reagent_container/food/snacks/grown/deathberries)
 	packet_icon = "seed-deathberry"
 	plant_icon = "deathberry"
-	chems = list("fruit" = list(1), "toxin" = list(3,3), "lexorin" = list(1,5))
+	chems_special = list("thymol")
+	chems = list("fruit" = list(1), "lexorin" = list(1,3))
 
 	yield = 3
 	potency = 50
@@ -823,7 +826,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	name = "nettle"
 	seed_name = "nettle"
 	display_name = "nettles"
-	products = list(/obj/item/grown/nettle)
+	products = list(/obj/item/reagent_container/food/snacks/grown/nettle)
 	mutants = list("deathnettle")
 	packet_icon = "seed-nettle"
 	plant_icon = "nettle"
@@ -840,12 +843,12 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	name = "deathnettle"
 	seed_name = "death nettle"
 	display_name = "death nettles"
-	products = list(/obj/item/grown/nettle/death)
+	products = list(/obj/item/reagent_container/food/snacks/grown/nettle/death )
 	mutants = null
 	packet_icon = "seed-deathnettle"
 	plant_icon = "deathnettle"
-	chems = list("plantmatter" = list(1,50), "pacid" = list(0,1))
-
+	chems = list("plantmatter" = list(1,50))
+	chems_special = list("urishiol")
 	maturation = 8
 	yield = 2
 
@@ -964,7 +967,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	name = "poisonapple"
 	mutants = null
 	products = list(/obj/item/reagent_container/food/snacks/grown/apple/poisoned)
-	chems = list("cyanide" = list(1,5))
+	chems = list("cyanide" = list(1,10))
 
 /datum/seed/apple/gold
 	name = "goldapple"
@@ -1063,7 +1066,8 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	mutants = list("libertycap")
 	packet_icon = "mycelium-reishi"
 	plant_icon = "reishi"
-	chems = list("mushroom" = list(1,50), "psilocybin" = list(3,5))
+	chems = list("mushroom" = list(1,50), "psilocybin" = list(3,5), "amatoxin" = list(3,10))
+	chems_special = list("zygacine")
 
 	maturation = 10
 	production = 5
@@ -1186,6 +1190,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	products = list(/obj/item/reagent_container/food/snacks/grown/poppy)
 	plant_icon = "poppy"
 	chems = list("plantmatter" = list(1,20), "bicaridine" = list(1,10))
+	chems_special = list("atropine")
 
 	lifespan = 25
 	potency = 20
@@ -1261,6 +1266,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	plant_icon = "cabbage"
 	harvest_repeat = 1
 	chems = list("vegetable" = list(1,10))
+	chems_special = list("psoralen")
 
 	lifespan = 50
 	maturation = 3
@@ -1274,7 +1280,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	seed_name = "S'randar's hand"
 	display_name = "S'randar's hand leaves"
 	packet_icon = "seed-shand"
-	products = list(/obj/item/stack/medical/advanced/bruise_pack/predator)
+	products = list(/obj/item/reagent_container/food/snacks/grown/shand)
 	plant_icon = "shand"
 	chems = list("bicaridine" = list(0,10))
 
@@ -1290,9 +1296,10 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	seed_name = "Messa's tear"
 	display_name = "Messa's tear leaves"
 	packet_icon = "seed-mtear"
-	products = list(/obj/item/stack/medical/advanced/ointment/predator)
+	products = list(/obj/item/reagent_container/food/snacks/grown/mtear)
 	plant_icon = "mtear"
 	chems = list("honey" = list(1,10), "kelotane" = list(3,5))
+	chems_special = list("digoxin")
 
 	lifespan = 50
 	maturation = 3
@@ -1403,6 +1410,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	products = list(/obj/item/reagent_container/food/snacks/grown/carrot)
 	plant_icon = "carrot"
 	chems = list("vegetable" = list(1,20), "imidazoline" = list(3,5))
+	chems_special = list("coniine", "phenol")
 
 	lifespan = 25
 	maturation = 10

@@ -53,6 +53,8 @@
 	var/chem_add_counter = 0
 	///Adjust the time between plant cycles Min -140
 	var/metabolism_adjust = 0
+	///if the plant is going to harvest itself once its ready
+	var/autoharvest = FALSE
 	///Initialize() 13 potential slots to block corresponding to seed/proc/mutate and hydroponics/proc/mutate
 	var/list/mutation_controller = list(
 		"Plant Cancer" = 0,
@@ -107,12 +109,12 @@
 	if(force_update)
 		force_update = 0
 	else if(world.time < (lastcycle + cycledelay + metabolism_adjust))
-		///Resets adjust
+		//Resets adjust
 		metabolism_adjust = 0
 		return
 	lastcycle = world.time
 
-	///Resets adjust
+	//Resets adjust
 	metabolism_adjust = 0
 
 	// Mutation level drops each main tick.
@@ -132,23 +134,24 @@
 	// If there is no seed data (and hence nothing planted),
 	// or the plant is dead, process nothing further.
 	if(!seed || dead)
-		if(draw_warnings) update_icon() //Harvesting would fail to set alert icons properly.
-		return
+		if(draw_warnings)
+			update_icon() //Harvesting would fail to set alert icons properly.
+			return
 
 	// Advance plant age.
-	if(prob(30))
+	if(prob(30) && nutrilevel > 0 && waterlevel > 0)
 		age += 1 * HYDRO_SPEED_MULTIPLIER
 
 	//Highly mutable plants have a chance of mutating every tick.
 	if(seed.immutable == -1)
 		var/mut_prob = rand(1,100)
 		if(mut_prob <= 10)
-			mutate(mut_prob == 1 ? 2 : 1, mutation_level)
+			mutate(mut_prob == 1 ? 2 : 1, mutation_level, mutation_controller)
 
 	// Other plants also mutate if enough mutagenic compounds have been added.
 	if(!seed.immutable)
-		if(prob(min(max(mutation_level, 2)/2, 100)))
-			mutate((rand(100) < 15) ? 2 : 1, mutation_level)
+		if(prob(min(max(mutation_level, 0), 100)))
+			mutate((rand(100) < 15) ? 2 : 1, mutation_level, mutation_controller)
 			mutation_level = 0
 
 	// Maintain tray nutrient and water levels.
@@ -165,8 +168,6 @@
 		plant_health += (nutrilevel < 2 ? -healthmod : healthmod)
 	if(seed.requires_water && prob(35))
 		plant_health += (waterlevel < 10 ? -healthmod : healthmod)
-	if(nutrilevel < 1)
-		plant_health = 0
 
 	// Check that pressure, heat are all within bounds.
 	// First, handle an open system or an unconnected closed system.
@@ -217,6 +218,13 @@
 	if(prob(3))  // On each tick, there's a chance the pest population will increase
 		pestlevel += 0.1 * HYDRO_SPEED_MULTIPLIER
 
+	if(harvest && autoharvest)
+		animate(src, transform = matrix(rand(1,-1), rand(-0.5,0.5), MATRIX_TRANSLATE), time = 0.5, easing = EASE_IN)
+		animate(transform = matrix(rand(-0.5,0.5), rand(1,-1), MATRIX_TRANSLATE), time = 0.5)
+		animate(transform = matrix(0, 0, MATRIX_TRANSLATE), time = 0.5, easing = EASE_OUT)
+		visible_message(SPAN_NOTICE("[src] shakes itself in attempt to harvest its products"))
+		harvest(null, TRUE) //this is ok
+
 	check_level_sanity()
 	update_icon()
 	return
@@ -230,7 +238,7 @@
 	if(reagents.total_volume <= 0)
 		return
 
-	reagents.trans_to(temp_chem_holder, min(reagents.total_volume,rand(1,3)))
+	reagents.trans_to(temp_chem_holder, min(reagents.total_volume,rand(3,6)))
 	for(var/datum/reagent/processed_reagent in temp_chem_holder.reagents.reagent_list)
 		processed_reagent.reaction_hydro_tray_reagent(src, processed_reagent.volume)
 		for(var/datum/chem_property/chem_property in processed_reagent?.properties)
@@ -277,7 +285,8 @@
 
 //Clears out a dead plant.
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/remove_dead(mob/user)
-	if(!user || !dead) return
+	if(!user || !dead)
+		return
 
 	seed = null
 	dead = 0
@@ -295,7 +304,6 @@
 		var/mut_name = mutation_controller[j]
 		if(mutation_controller[mut_name] > -3)
 			mutation_controller[mut_name] = 0
-
 
 	to_chat(user, SPAN_NOTICE("You remove the dead plant from [src]."))
 	check_level_sanity()
@@ -349,9 +357,11 @@
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/weed_invasion()
 
 	//Remove the seed if something is already planted.
-	if(seed) seed = null
+	if(seed)
+		seed = null
 	seed = GLOB.seed_types[pick(list("mushrooms","plumphelmet","harebells","poppies","grass","weeds"))]
-	if(!seed) return //Weed does not exist, someone fucked up.
+	if(!seed)
+		return //Weed does not exist, someone fucked up.
 
 	dead = 0
 	age = 0
@@ -366,13 +376,13 @@
 
 	return
 
-/obj/structure/machinery/portable_atmospherics/hydroponics/proc/mutate(severity, mutation_level)
+/obj/structure/machinery/portable_atmospherics/hydroponics/proc/mutate(severity, mutation_level, mutation_controller)
 
 	// No seed, no mutations.
 	if(!seed)
 		return
 
-	// Check if we should even bother working on the current seed datum. mutation_controller
+	// Check if we should even bother working on the current seed datum. mutation_controller affects
 	if((LAZYLEN(seed.mutants) && severity > 1 && mutation_controller["Mutate Species"] == 0) || mutation_controller["Mutate Species"] > 0)
 		mutate_species()
 		return
@@ -382,7 +392,7 @@
 	// harvested yet and it's safe to assume it's restricted to this tray.
 	if(!isnull(GLOB.seed_types[seed.name]))
 		seed = seed.diverge()
-	seed.mutate(severity ,get_turf(src), src)
+	seed.mutate(severity ,get_turf(src), mutation_level, mutation_controller)
 	return
 
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/check_level_sanity()
@@ -592,6 +602,17 @@
 		playsound(loc, 'sound/items/Ratchet.ogg', 25, 1)
 		anchored = !anchored
 		to_chat(user, "You [anchored ? "wrench" : "unwrench"] \the [src].")
+	else if(istype(O, /obj/item/research_upgrades/autoharvest))
+		if(!autoharvest)
+			to_chat(user, SPAN_NOTICE("You insert [O] into [src]."))
+			animate(src, transform = matrix(-1, 0.5, MATRIX_TRANSLATE), time = 0.5, easing = EASE_IN)
+			animate(transform = matrix(0.5, -1, MATRIX_TRANSLATE), time = 0.5)
+			animate(transform = matrix(0, 0, MATRIX_TRANSLATE), time = 0.5, easing = EASE_OUT)
+			autoharvest = TRUE
+			qdel(O)
+		else
+			to_chat(user, SPAN_WARNING("[src] is already capable of automatic harvesting."))
+			return
 
 /obj/structure/machinery/portable_atmospherics/hydroponics/get_examine_text(mob/user)
 	. = ..()
