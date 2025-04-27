@@ -944,7 +944,7 @@
 
 //Makes plant repeat harvest, potency is limited to .5
 /datum/chem_property/positive/photosensitive/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
-		. = ..()
+	. = ..()
 	if(!processing_tray.seed)
 		return
 	if(processing_tray.seed.harvest_repeat == 1)

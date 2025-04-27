@@ -267,9 +267,9 @@
 		chem_add_counter = 0
 		metabolism_adjust = 0
 		for(var/j = 1; j<=length(mutation_controller); j++)
-		var/mut_name = mutation_controller[j]
-		if(mutation_controller[mut_name] > -3)
-			mutation_controller[mut_name] = 0
+			var/mut_name = mutation_controller[j]
+			if(mutation_controller[mut_name] > -3)
+				mutation_controller[mut_name] = 0
 
 	check_level_sanity()
 	update_icon()

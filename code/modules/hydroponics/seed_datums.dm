@@ -347,7 +347,6 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 		//Low level mutation cancels any mutation
 		if(mut_number < 0)
 			return
-		var/mut_type = mutation_controller[mut_number]
 
 		switch(mut_number)
 			if(1) //Plant cancer!
