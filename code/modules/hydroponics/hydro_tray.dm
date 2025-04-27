@@ -260,14 +260,16 @@
 		age = 0
 		sampled = 0
 		mutation_mod = 0
-		///resets these counters when the plant is harvested and removed from tray
+		//resets these counters when the plant is harvested and removed from tray
 		potency_counter = 0
 		repeat_harvest_counter = 0
 		production_time_counter = 0
 		chem_add_counter = 0
-
-
-
+		metabolism_adjust = 0
+		for(var/j = 1; j<=length(mutation_controller); j++)
+		var/mut_name = mutation_controller[j]
+		if(mutation_controller[mut_name] > -3)
+			mutation_controller[mut_name] = 0
 
 	check_level_sanity()
 	update_icon()
@@ -283,13 +285,16 @@
 	age = 0
 	yield_mod = 0
 	mutation_mod = 0
-	///resets these counters when the plant is harvested and removed from tray
+	//resets these counters when the plant is harvested and removed from tray
 	potency_counter = 0
 	repeat_harvest_counter = 0
 	production_time_counter = 0
 	chem_add_counter = 0
-
-
+	metabolism_adjust = 0
+	for(var/j = 1; j<=length(mutation_controller); j++)
+		var/mut_name = mutation_controller[j]
+		if(mutation_controller[mut_name] > -3)
+			mutation_controller[mut_name] = 0
 
 
 	to_chat(user, SPAN_NOTICE("You remove the dead plant from [src]."))
@@ -394,24 +399,24 @@
 	pestlevel =   max(0,min(pestlevel,10))
 	weedlevel =   max(0,min(weedlevel,10))
 	toxins =  max(0,min(toxins,10))
-	///Adjust the time between plant cycles Min -140
+	//Adjust the time between plant cycles Min -140
 	metabolism_adjust = 0
 
-	///Ensures increased nutrient and water consumption as yield_mod increases
+	//Ensures increased nutrient and water consumption as yield_mod increases
 	if(yield_mod>20)
 		seed = seed.diverge()
 		if(yield_mod>70)
-			seed.nutrient_consumption = max(7,seed.nutrient_consumption)
-			seed.water_consumption = max(25,seed.water_consumption)
+			seed.nutrient_consumption = max(3,seed.nutrient_consumption)
+			seed.water_consumption = max(10,seed.water_consumption)
 		else if(yield_mod>50)
-			seed.nutrient_consumption = max(5,seed.nutrient_consumption)
-			seed.water_consumption = max(20,seed.water_consumption)
+			seed.nutrient_consumption = max(2.5,seed.nutrient_consumption)
+			seed.water_consumption = max(8,seed.water_consumption)
 		else if(yield_mod>30)
 			seed.nutrient_consumption = max(2,seed.nutrient_consumption)
-			seed.water_consumption = max(14,seed.water_consumption)
+			seed.water_consumption = max(6,seed.water_consumption)
 		else if(yield_mod>20)
 			seed.nutrient_consumption = max(1,seed.nutrient_consumption)
-			seed.water_consumption = max(6,seed.water_consumption)
+			seed.water_consumption = max(3,seed.water_consumption)
 
 /obj/structure/machinery/portable_atmospherics/hydroponics/proc/mutate_species()
 

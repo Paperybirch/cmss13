@@ -942,22 +942,23 @@
 	to_chat(M, SPAN_WARNING("Your feel a horrible migraine!"))
 	M.apply_internal_damage(potency, "brain")
 
+//Makes plant repeat harvest, potency is limited to .5
 /datum/chem_property/positive/photosensitive/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
-	. = ..()
+		. = ..()
 	if(!processing_tray.seed)
 		return
 	if(processing_tray.seed.harvest_repeat == 1)
 		return
-	processing_tray.weedlevel += 0.4*(10-(potency*2))*volume
-	processing_tray.repeat_harvest_counter += 5*(potency*2)*volume
+	processing_tray.weedlevel += 0.25*volume
+	processing_tray.nutrilevel += -0.25*volume
+	processing_tray.repeat_harvest_counter += 10*volume
 	if (processing_tray.repeat_harvest_counter >= 100)
-		if (rand(0,2) < 2)
+		if (prob(50))
 			processing_tray.repeat_harvest_counter += -1*rand(20,50)
 			return
 		var/turf/c_turf = get_turf(processing_tray)
 		processing_tray.seed = processing_tray.seed.diverge()
 		processing_tray.seed.harvest_repeat = 1
-		processing_tray.seed.nutrient_consumption += 0.15*(10-(potency*2))
 		c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] begins to shimmer with a color out of space"))
 		processing_tray.potency_counter = 0
 
@@ -974,22 +975,23 @@
 	M.take_limb_damage(brute = 0.5 * potency)
 	M.apply_internal_damage(potency, "liver")
 
+//Makes plant repeat harvest, potency is limited to .5
 /datum/chem_property/positive/crystallization/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
 	. = ..()
 	if(!processing_tray.seed)
 		return
 	if(processing_tray.seed.harvest_repeat == 1)
 		return
-	processing_tray.weedlevel += 0.8*(10-(potency*2))*volume
-	processing_tray.repeat_harvest_counter += 5*(potency*2)*volume
+	processing_tray.weedlevel += 0.25*volume
+	processing_tray.nutrilevel += -0.25*volume
+	processing_tray.repeat_harvest_counter += 10*volume
 	if (processing_tray.repeat_harvest_counter >= 100)
-		if (rand(0,2) < 2)
+		if (prob(50))
 			processing_tray.repeat_harvest_counter += -1*rand(20,50)
 			return
 		var/turf/c_turf = get_turf(processing_tray)
 		processing_tray.seed = processing_tray.seed.diverge()
 		processing_tray.seed.harvest_repeat = 1
-		processing_tray.seed.nutrient_consumption += 0.15*(10-(potency*2))
 		c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] begins to shimmer with a color out of space"))
 		processing_tray.potency_counter = 0
 
@@ -1121,6 +1123,8 @@
 	if(!processing_tray.seed)
 		return
 	processing_tray?.mutation_mod += -4*(potency*2)*volume
+	processing_tray?.yield_mod += -4*(potency*2)*volume
+
 
 
 /datum/chem_property/positive/oxygenating

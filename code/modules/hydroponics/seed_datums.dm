@@ -413,7 +413,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 											prob(5);pick(GLOB.chemical_gen_classes_list["T2"])) = list(1,rand(1,2)))
 				chems += new_chem
 
-	///reset mutation_controller for next cycle
+	//reset mutation_controller for next cycle
 	for(var/j = 1; j<=length(mutation_controller); j++)
 		var/mut_name = mutation_controller[j]
 		if(mutation_controller[mut_name] > -3)
