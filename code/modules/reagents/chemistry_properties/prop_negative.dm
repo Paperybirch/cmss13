@@ -60,20 +60,6 @@
 	if(istype(O,/obj/effect/plantsegment))
 		if(prob(50))
 			qdel(O)
-		return
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-
-		if(!tray.seed)
-			return
-		tray.health -= rand(30,50)
-		if(tray.pestlevel > 0)
-			tray.pestlevel -= 2
-		if(tray.weedlevel > 0)
-			tray.weedlevel -= 3
-		tray.toxins += 4
-		tray.check_level_sanity()
-		tray.update_icon()
 
 /datum/chem_property/negative/toxic/reaction_mob(mob/living/M, method=TOUCH, volume, potency = 1)
 	if(!iscarbon(M))
@@ -180,7 +166,9 @@
 		return
 	if(processing_tray.weedlevel > 0)
 		processing_tray.weedlevel += -1*(potency*2)*volume
-		processing_tray.plant_health += -0.1*(potency*2)*volume
+	if(processing_tray.pestlevel > 0)
+		processing_tray.pestlevel += -1*(potency*2)*volume
+
 
 
 /datum/chem_property/negative/biocidic
@@ -205,9 +193,10 @@
 	. = ..()
 	if(!processing_tray.seed)
 		return
+	if(processing_tray.weedlevel > 0)
+		processing_tray.weedlevel += -1*(potency*2)*volume
 	if(processing_tray.pestlevel > 0)
 		processing_tray.pestlevel += -1*(potency*2)*volume
-		processing_tray.plant_health += -0.1*(potency*2)*volume
 
 /datum/chem_property/negative/paining
 	name = PROPERTY_PAINING
@@ -372,17 +361,21 @@
 /datum/chem_property/negative/intravenous
 	name = PROPERTY_INTRAVENOUS
 	code = "INV"
-	description = "Due to chemical composition, this chemical can only be administered intravenously."
+	description = "Due to chemical composition, this chemical can only be administered intravenously. The side effect is improving absorption on the chemical, although this is less effective than natural absorption"
 	rarity = PROPERTY_COMMON
 	category = PROPERTY_TYPE_METABOLITE
-	max_level = 1
+
+/datum/chem_property/negative/intravenous/pre_process(mob/living/M)
+	return list(REAGENT_BOOST = level)
 
 /datum/chem_property/negative/intravenous/reset_reagent()
 	holder.flags = initial(holder.flags)
+	holder.custom_metabolism = initial(holder.custom_metabolism)
 	return ..()
 
 /datum/chem_property/negative/intravenous/update_reagent()
 	holder.flags |= REAGENT_NOT_INGESTIBLE
+	holder.custom_metabolism = holder.custom_metabolism * (level)
 	return ..()
 
 /datum/chem_property/negative/nephrotoxic
@@ -566,12 +559,13 @@
 	holder.custom_metabolism = holder.custom_metabolism * (1 + POTENCY_MULTIPLIER_VLOW * level)
 	..()
 
-///Rate of 10 ticks per level decreases time between plant cycles
 /datum/chem_property/negative/hypermetabolic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
 	. = ..()
 	if(!processing_tray.seed)
 		return
-	processing_tray.metabolism_adjust = -20*potency
+	processing_tray.metabolism_adjust += clamp(-20*potency, 0, -130)
+
+
 
 /datum/chem_property/negative/addictive
 	name = PROPERTY_ADDICTIVE
@@ -617,8 +611,12 @@
 		return
 	..()
 	var/mob/living/carbon/C = M
-	C.blood_volume = max(C.blood_volume - POTENCY_MULTIPLIER_VHIGH * potency, 0)
+	if(M.nutrition >= NUTRITION_LOW)
+		C.blood_volume = max(C.blood_volume - POTENCY_MULTIPLIER_HIGH * potency, 0)
 	holder.volume++
+	else
+		C.blood_volume = max(C.blood_volume - POTENCY_MULTIPLIER_LOW * potency, 0)
+
 
 /datum/chem_property/negative/hemositic/process_overdose(mob/living/M, potency = 1, delta_time)
 	if(!iscarbon(M))

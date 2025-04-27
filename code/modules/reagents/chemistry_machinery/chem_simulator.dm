@@ -2,7 +2,7 @@
 #define MODE_AMPLIFY 1
 #define MODE_SUPPRESS 2
 #define MODE_RELATE 3
-#define MODE_CREATE 4
+#define MODE_ADD 4
 
 #define SIMULATION_FAILURE -1
 #define SIMULATION_STAGE_OFF 0
@@ -10,8 +10,7 @@
 #define SIMULATION_STAGE_WAIT 2
 #define SIMULATION_STAGE_3 3
 #define SIMULATION_STAGE_4 4
-#define SIMULATION_STAGE_5 5
-#define SIMULATION_STAGE_BEGIN 6
+#define SIMULATION_STAGE_BEGIN 5
 
 /obj/structure/machinery/chem_simulator
 	name = "synthesis simulator"
@@ -40,14 +39,6 @@
 	var/status_bar = "READY"
 	var/ready = FALSE
 
-	var/template_filter = PROPERTY_TYPE_ALL
-	var/creation_template
-	var/creation_complexity = list(CHEM_CLASS_COMMON, CHEM_CLASS_UNCOMMON, CHEM_CLASS_RARE)
-	var/creation_name = ""
-	var/creation_cost = 0
-	var/min_creation_cost = 0
-	var/creation_od_level = 10 //a cache for new_od_level when switching between modes
-
 	unslashable = TRUE
 	unacidable = TRUE
 
@@ -56,7 +47,6 @@
 	LAZYINITLIST(simulations)
 	LAZYINITLIST(property_costs)
 	LAZYINITLIST(recipe_targets)
-	LAZYINITLIST(creation_template)
 
 /obj/structure/machinery/chem_simulator/power_change()
 	..()
@@ -69,7 +59,7 @@
 		return
 	if(istype(B, /obj/item/paper/research_notes))
 		var/obj/item/paper/research_notes/note = B
-		if(!target || (mode == MODE_RELATE && !reference))
+		if(!target || (mode == MODE_RELATE || mode == MODE_ADD) && !reference && note.data)
 			B = note.convert_to_chem_report()
 		else
 			to_chat(user, SPAN_WARNING("Chemical data already inserted."))
@@ -79,7 +69,7 @@
 		if(!target && note.data)
 			target = B
 			ready = check_ready()
-		else if(mode == MODE_RELATE && !reference && note.data)
+		else if((mode == MODE_RELATE || mode == MODE_ADD) && !reference && note.data)
 			target_property = null
 			reference = B
 			ready = check_ready()
@@ -112,22 +102,24 @@
 	. = ..()
 	var/list/data = list()
 	data["status"] = status_bar
+	data["credits"] = GLOB.chemical_data.rsc_credits
 	ready = check_ready()
 	data["is_ready"] = ready
 	data["can_simulate"] = (ready && simulating == SIMULATION_STAGE_OFF)
 	data["can_eject_target"] = ((target ? TRUE : FALSE) && simulating == SIMULATION_STAGE_OFF)
 	data["can_eject_reference"] = ((reference ? TRUE : FALSE) && simulating == SIMULATION_STAGE_OFF)
-	data["is_picking_recipe"] = (simulating == SIMULATION_STAGE_FINAL && mode != MODE_CREATE)
+	data["is_picking_recipe"] = (simulating == SIMULATION_STAGE_FINAL)
 	data["lock_control"] = (simulating != SIMULATION_STAGE_OFF)
 	data["can_cancel_simulation"] = (simulating <= SIMULATION_STAGE_WAIT)
-	data["estimated_cost"] = (mode == MODE_CREATE ? creation_cost : (!target_property ? "NULL" : property_costs[target_property.name]))
+	if(mode != MODE_ADD)
+		data["estimated_cost"] = (!target_property  ? "NULL" : property_costs[target_property.name])
+	else
+		data["estimated_cost"] = (!reference_property  ? "NULL" : property_costs[reference_property.name])
+	if(target?.data)
 	calculate_new_od_level()
 	data["od_level"] = new_od_level
-	data["chemical_name"] = (mode == MODE_CREATE ? (creation_name == "" ? "NAME NOT SET" : creation_name) : (isnull(target) ? "CHEMICAL DATA NOT INSERTED" : target.data.name))
+	data["chemical_name"] = (isnull(target) ? "CHEMICAL DATA NOT INSERTED" : target.data.name)
 	data["reference_name"] = (isnull(reference) ? "CHEMICAL DATA NOT INSERTED" : reference.data.name)
-
-	if(mode == MODE_CREATE && GLOB.chemical_data.has_new_properties)
-		update_costs()
 
 	if(simulating == SIMULATION_STAGE_FINAL)
 		for(var/reagent_id in recipe_targets)
