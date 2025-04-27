@@ -326,34 +326,45 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 
 	//This looks like shit, but it's a lot easier to read/change this way.
 	var/total_mutations = rand(1,1+degree)
-	for(var/i = 0;i<total_mutations;i++)
+	var/mutation_controller = processing_tray.mutation_controller
+	var/list/allowed_mutations[]
 
-		///cancels out mutations
-		var/mut_number = rand(0,14)
-		if(processing_tray.mutation_cancel[processing_tray.mutation_cancel[mut_number]]>0)
-			source_turf.visible_message(SPAN_DANGER("[mut_number] blocked mutation"))
-			//If our mutation cancel is strong enough, property level 4+, we keep rerolling until an unblocked mutation
-			if(processing_tray.mutation_cancel[processing_tray.mutation_cancel[mut_number]]>3)
-				i = i-1
-			else
+	//Generates list of what mutation outcomes are allowed after considering mutation cancel and mutation enable effects
+	for(var/c=1; c<length(mutation_controller); c++)
+		var/mut_name = mutation_controller[c]
+		var/mutation_enable_check = FALSE
+		if(mutation_controller[mut_name] > 0)
+			allowed_mutations += list(c)
+			mutation_enable_check = TRUE
+		if((mutation_controller[mut_name] == 0 || mutation_controller[mut_name] == -1) && mutation_enable_check == FALSE )
+			if(mutation_controller[mut_name] == -1)
+				allowed_mutations += list(-c)
 				return
-			continue
+			allowed_mutations += list(c)
+
+	for(var/i = 0;i<total_mutations;i++)
+		var/mut_number = allowed_mutations[rand(1,length(allowed_mutations))]
+		//Low level mutation cancels any mutation
+		if(mut_number < 0)
+			return
+		var/mut_type = mutation_controller[mut_number]
+
 		switch(mut_number)
-			if(0) //Plant cancer!
+			if(1) //Plant cancer!
 				lifespan = max(0,lifespan-rand(1,5))
 				endurance = max(0,endurance-rand(10,20))
 				source_turf.visible_message(SPAN_DANGER("\The [display_name] withers rapidly!"))
-			if(1) //Gluttony!
+			if(2) //Gluttony!
 				nutrient_consumption =   max(0,  min(5,   nutrient_consumption + rand(-(degree*0.1),(degree*0.1))))
 				water_consumption =  max(0,  min(50,  water_consumption + rand(-degree,degree)))
-			if(2) //Endurance
+			if(3) //Endurance
 				endurance =  max(10, min(100, endurance + (rand(-5,5)   * degree)))
-			if(3) //Light tolerance
+			if(4) //Light tolerance
 				ideal_light =    max(0,  min(30,  ideal_light   + (rand(-1,1)   * degree)))
 				light_tolerance =    max(0,  min(10,  light_tolerance   + (rand(-2,2)   * degree)))
-			if(4) //Toxin tolerance
+			if(5) //Toxin tolerance
 				toxins_tolerance =   max(0,  min(10,  weed_tolerance    + (rand(-2,2)   * degree)))
-			if(5) //Weed tolerance
+			if(6) //Weed tolerance
 				weed_tolerance  =    max(0,  min(10,  weed_tolerance    + (rand(-2,2)   * degree)))
 				if(prob(degree*5))
 					carnivorous =    max(0,  min(2,   carnivorous   + rand(-degree,degree)))
@@ -361,19 +372,19 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 						source_turf.visible_message(SPAN_NOTICE("\The [display_name] shudders hungrily."))
 				else if(prob(degree*5))
 					parasite = !parasite
-			if(6) //Production
+			if(7) //Production
 				production = max(1,  min(10,  production    + (rand(-1,1)   * degree)))
-			if(7) //Lifespan
+			if(8) //Lifespan
 				lifespan =   max(10, min(30,  lifespan  + (rand(-2,2)   * degree)))
 				if(yield != -1)
 					yield =  max(0,  min(10,  yield + (rand(-2,2)   * degree)))
-			if(8) //Potency
+			if(9) //Potency
 				potency =    max(0,  min(200, potency   + (rand(-20,20) * degree)))
-			if(9) //Maturity
+			if(10) //Maturity
 				maturation = max(0,  min(30,  maturation   + (rand(-1,1)   * degree)))
 				if(prob(degree*5))
 					harvest_repeat = !harvest_repeat
-			if(10) //Bioluminecence
+			if(11) //Bioluminecence
 				if(prob(degree*2))
 					biolum = !biolum
 					if(biolum)
@@ -383,7 +394,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 							source_turf.visible_message(SPAN_NOTICE("\The [display_name]'s glow <font color='[biolum_color]'>changes color</font>!"))
 					else
 						source_turf.visible_message(SPAN_NOTICE("\The [display_name]'s glow dims..."))
-			if(11) //Flowers?
+			if(12) //Flowers?
 				if(prob(degree*2))
 					flowers = !flowers
 					if(flowers)
@@ -402,23 +413,11 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 											prob(5);pick(GLOB.chemical_gen_classes_list["T2"])) = list(1,rand(1,2)))
 				chems += new_chem
 
-	///reset mutation_cancel for next cycle
-	processing_tray.mutation_cancel = list(
-		"Plant Cancer" =0,
-		"Gluttony" = 0,
-		"Endurance" = 0,
-		"Light Tolerance" = 0,
-		"Toxin Tolerance" = 0,
-		"Weed Tolerance" = 0,
-		"Production" = 0,
-		"Lifespan" = 0,
-		"Potency" = 0,
-		"Maturity" = 0,
-		"Bioluminecence" = 0,
-		"Flowers" = 0,
-		"New Chems" = 0,
-		"Mutate Species" = 0,
-		)
+	///reset mutation_controller for next cycle
+	for(var/j = 1; j<=length(mutation_controller); j++)
+		var/mut_name = mutation_controller[j]
+		if(mutation_controller[mut_name] > -3)
+			processing_tray.mutation_controller[mut_name] = 0
 	return
 
 //Mutates a specific trait/set of traits.

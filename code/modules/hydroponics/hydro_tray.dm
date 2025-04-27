@@ -54,21 +54,23 @@
 	///Adjust the time between plant cycles Min -140
 	var/metabolism_adjust = 0
 	///Initialize() 13 potential slots to block corresponding to seed/proc/mutate and hydroponics/proc/mutate
-	var/list/mutation_cancel = list(
-		"Plant Cancer" = 5,
-		"Gluttony" = 5,
-		"Endurance" = 5,
-		"Light Tolerance" = 5,
-		"Toxin Tolerance" = 5,
-		"Weed Tolerance" = 5,
-		"Production" = 5,
-		"Lifespan" = 5,
-		"Potency" = 5,
-		"Maturity" = 5,
-		"Bioluminecence" = 5,
+	var/list/mutation_controller = list(
+		"Plant Cancer" = 0,
+		"Gluttony" = 0,
+		"Endurance" = 0,
+		"Light Tolerance" = 0,
+		"Toxin Tolerance" = 0,
+		"Weed Tolerance" = 0,
+		"Production" = 0,
+		"Lifespan" = 0,
+		"Potency" = 0,
+		"Maturity" = 0,
+		"Bioluminecence" = 0,
 		"Flowers" = 0,
 		"New Chems" = 0,
-		"Mutate Species" = 1,
+		"New Chems2" = 0,
+		"New Chems3" = 0,
+		"Mutate Species" = 0,
 		)
 
 	// Reagent information for process(), consider moving this to a controller along
@@ -99,6 +101,7 @@
 
 	//Do this even if we're not ready for a plant cycle.
 	process_reagents()
+	mutation_level = mutation_level + mutation_mod/4
 
 	// Update values every cycle rather than every process() tick.
 	if(force_update)
@@ -231,7 +234,7 @@
 	for(var/datum/reagent/processed_reagent in temp_chem_holder.reagents.reagent_list)
 		processed_reagent.reaction_hydro_tray_reagent(src, processed_reagent.volume)
 		for(var/datum/chem_property/chem_property in processed_reagent?.properties)
-			chem_property.reaction_hydro_tray(src, level/2, processed_reagent.volume)
+			chem_property.reaction_hydro_tray(src, chem_property.level/2, processed_reagent.volume)
 
 	temp_chem_holder.reagents.clear_reagents()
 	check_level_sanity()
@@ -364,8 +367,8 @@
 	if(!seed)
 		return
 
-	// Check if we should even bother working on the current seed datum. Mutation_cancel
-	if(LAZYLEN(seed.mutants) && severity > 1 && mutation_cancel["Mutate Species"] == 0)
+	// Check if we should even bother working on the current seed datum. mutation_controller
+	if((LAZYLEN(seed.mutants) && severity > 1 && mutation_controller["Mutate Species"] == 0) || mutation_controller["Mutate Species"] > 0)
 		mutate_species()
 		return
 

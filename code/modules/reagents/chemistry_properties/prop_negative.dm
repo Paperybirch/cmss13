@@ -357,15 +357,15 @@
 /datum/chem_property/negative/hepatotoxic/process_critical(mob/living/M, potency = 1)
 	M.apply_damage(POTENCY_MULTIPLIER_VHIGH * potency, TOX)
 
-//Applies mutation cancel onto hydrotray plants
+//Applies mutation cancel onto hydrotray plants, negative affects like increasing consumption and lowering life
 /datum/chem_property/negative/hepatotoxic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
 	. = ..()
 	if(!processing_tray.seed)
 		return
-	if (processing_tray.mutation_cancel["Plant Cancer"] < potency*2)
-		processing_tray.mutation_cancel["Plant Cancer"] = potency*2
-	if (processing_tray.mutation_cancel["Gluttony"] < potency*2)
-		processing_tray.mutation_cancel["Gluttony"] = potency*2
+	if (processing_tray.mutation_controller["Plant Cancer"] > potency*-2)
+		processing_tray.mutation_controller["Plant Cancer"] = potency*-2
+	if (processing_tray.mutation_controller["Gluttony"] > potency*-2)
+		processing_tray.mutation_controller["Gluttony"] = potency*-2
 
 /datum/chem_property/negative/intravenous
 	name = PROPERTY_INTRAVENOUS
@@ -401,17 +401,17 @@
 /datum/chem_property/negative/nephrotoxic/process_critical(mob/living/M, potency = 1)
 	M.apply_damage(POTENCY_MULTIPLIER_VHIGH * potency, TOX)
 
-//Applies mutation cancel onto hydrotray plants
+//Applies mutation cancel onto hydrotray plants, prevents tolerance adjustment, parasitic and carnivorus
 /datum/chem_property/negative/nephrotoxic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
 	. = ..()
 	if(!processing_tray.seed)
 		return
-	if (processing_tray.mutation_cancel["Light Tolerance"] < potency*2)
-		processing_tray.mutation_cancel["Light Tolerance"] = potency*2
-	if (processing_tray.mutation_cancel["Weed Tolerance"] < potency*2)
-		processing_tray.mutation_cancel["Weed Tolerance"] = potency*2
-	if (processing_tray.mutation_cancel["Toxin Tolerance"] < potency*2)
-		processing_tray.mutation_cancel["Toxin Tolerance"] = potency*2
+	if (processing_tray.mutation_controller["Light Tolerance"] > potency*-2)
+		processing_tray.mutation_controller["Light Tolerance"] = potency*-2
+	if (processing_tray.mutation_controller["Weed Tolerance"] > potency*-2)
+		processing_tray.mutation_controller["Weed Tolerance"] = potency*-2
+	if (processing_tray.mutation_controller["Toxin Tolerance"] > potency*-2)
+		processing_tray.mutation_controller["Toxin Tolerance"] = potency*-2
 
 /datum/chem_property/negative/pneumotoxic
 	name = PROPERTY_PNEUMOTOXIC
@@ -431,19 +431,19 @@
 /datum/chem_property/negative/pneumotoxic/process_critical(mob/living/M, potency = 1)
 	M.apply_damage(POTENCY_MULTIPLIER_VHIGH * potency, OXY)
 
-//Applies mutation cancel onto hydrotray plants
+//Applies mutation cancel onto hydrotray plants, prevents plant life, yield, grow times and repeat harvest mutation
 /datum/chem_property/negative/pneumotoxic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
 	. = ..()
 	if(!processing_tray.seed)
 		return
-	if (processing_tray.mutation_cancel["Endurance"] < potency*2)
-		processing_tray.mutation_cancel["Endurance"] = potency*2
-	if (processing_tray.mutation_cancel["Production"] < potency*2)
-		processing_tray.mutation_cancel["Production"] = potency*2
-	if (processing_tray.mutation_cancel["Lifespan"] < potency*2)
-		processing_tray.mutation_cancel["Lifespan"] = potency*2
-	if (processing_tray.mutation_cancel["Maturity"] < potency*2)
-		processing_tray.mutation_cancel["Maturity"] = potency*2
+	if (processing_tray.mutation_controller["Endurance"] > potency*-2)
+		processing_tray.mutation_controller["Endurance"] = potency*-2
+	if (processing_tray.mutation_controller["Production"] > potency*-2)
+		processing_tray.mutation_controller["Production"] = potency*-2
+	if (processing_tray.mutation_controller["Lifespan"] > potency*-2)
+		processing_tray.mutation_controller["Lifespan"] = potency*-2
+	if (processing_tray.mutation_controller["Maturity"] > potency*-2)
+		processing_tray.mutation_controller["Maturity"] = potency*-2
 
 
 /datum/chem_property/negative/oculotoxic
@@ -467,15 +467,17 @@
 /datum/chem_property/negative/oculotoxic/process_critical(mob/living/M, potency = 1)
 	M.apply_damage(POTENCY_MULTIPLIER_LOW * potency, BRAIN)
 
-//Applies mutation cancel onto hydrotray plants
+//Applies mutation cancel onto hydrotray plants, prevents potency, glowing or flowers mutations
 /datum/chem_property/negative/oculotoxic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
 	. = ..()
 	if(!processing_tray.seed)
 		return
-	if (processing_tray.mutation_cancel["Bioluminecence"] < potency*2)
-		processing_tray.mutation_cancel["Bioluminecence"] = potency*2
-	if (processing_tray.mutation_cancel["Flowers"] < potency*2)
-		processing_tray.mutation_cancel["Flowers"] = potency*2
+	if (processing_tray.mutation_controller["Potency"] > potency*-2)
+		processing_tray.mutation_controller["Potency"] = potency*-2
+	if (processing_tray.mutation_controller["Bioluminecence"] > potency*-2)
+		processing_tray.mutation_controller["Bioluminecence"] = potency*-2
+	if (processing_tray.mutation_controller["Flowers"] > potency*-2)
+		processing_tray.mutation_controller["Flowers"] = potency*-2
 
 /datum/chem_property/negative/cardiotoxic
 	name = PROPERTY_CARDIOTOXIC
@@ -495,15 +497,17 @@
 /datum/chem_property/negative/cardiotoxic/process_critical(mob/living/M, potency = 1)
 	M.apply_damage(POTENCY_MULTIPLIER_VHIGH * potency, OXY)
 
-//Applies mutation cancel onto hydrotray plants
+//Applies mutation cancel onto hydrotray plants, prevents new chems from being added
 /datum/chem_property/negative/cardiotoxic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
 	. = ..()
 	if(!processing_tray.seed)
 		return
-	if (processing_tray.mutation_cancel["Potency"] < potency*2)
-		processing_tray.mutation_cancel["Potency"] = potency*2
-	if (processing_tray.mutation_cancel["New Chems"] < potency*2)
-		processing_tray.mutation_cancel["New Chems"] = potency*2
+	if (processing_tray.mutation_controller["New Chems"] > potency*-2)
+		processing_tray.mutation_controller["New Chems"] = potency*-2
+	if (processing_tray.mutation_controller["New Chems2"] > potency*-2)
+		processing_tray.mutation_controller["New Chems2"] = potency*-2
+	if (processing_tray.mutation_controller["New Chems3"] > potency*-2)
+		processing_tray.mutation_controller["New Chems3"] = potency*-2
 
 /datum/chem_property/negative/neurotoxic
 	name = PROPERTY_NEUROTOXIC
@@ -537,13 +541,13 @@
 		var/mob/living/carbon/xenomorph/xeno = M
 		xeno.AddComponent(/datum/component/status_effect/daze, volume * potency * POTENCY_MULTIPLIER_LOW, 30)
 
-//Applies mutation cancel onto hydrotray plants
+//Applies mutation cancel onto hydrotray plants, prevents species mutation
 /datum/chem_property/negative/neurotoxic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
 	. = ..()
 	if(!processing_tray.seed)
 		return
-	if (processing_tray.mutation_cancel["Mutate Species"] < potency*2)
-		processing_tray.mutation_cancel["Mutate Species"] = potency*2
+	if (processing_tray.mutation_controller["Mutate Species"] > potency*-2)
+		processing_tray.mutation_controller["Mutate Species"] = potency*-2
 
 /datum/chem_property/negative/hypermetabolic
 	name = PROPERTY_HYPERMETABOLIC
@@ -590,14 +594,6 @@
 
 /datum/chem_property/negative/addictive/process_critical(mob/living/M, potency = 1, delta_time)
 	M.disabilities |= NERVOUS
-
-//Applies mutation cancel onto hydrotray plants
-/datum/chem_property/negative/addictive/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
-	. = ..()
-	if(!processing_tray.seed)
-		return
-	if (processing_tray.mutation_cancel["Mutate Species"] < potency*2)
-		processing_tray.mutation_cancel["Mutate Species"] = potency*2
 
 //PROPERTY_DISABLED (in generation)
 /datum/chem_property/negative/hemositic

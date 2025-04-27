@@ -299,7 +299,15 @@
 /datum/chem_property/positive/hepatopeutic/process_critical(mob/living/M, potency = 1, delta_time)
 	M.apply_damage(2.5 * potency * delta_time, TOX)
 
-
+//Applies mutation enable onto hydrotray plants, negative affects like increasing consumption and lowering life
+/datum/chem_property/positive/hepatopeutic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	if (processing_tray.mutation_controller["Plant Cancer"] < 1)
+		processing_tray.mutation_controller["Plant Cancer"] = 1
+	if (processing_tray.mutation_controller["Gluttony"] < 1)
+		processing_tray.mutation_controller["Gluttony"] = 1
 
 /datum/chem_property/positive/nephropeutic
 	name = PROPERTY_NEPHROPEUTIC
@@ -321,6 +329,18 @@
 /datum/chem_property/positive/nephropeutic/process_critical(mob/living/M, potency = 1, delta_time)
 	M.apply_damage(2.5 * potency * delta_time, TOX)
 
+//Applies mutation enable onto hydrotray plants, enables tolerance adjustment, parasitic and carnivorus
+/datum/chem_property/positive/nephropeutic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	if (processing_tray.mutation_controller["Light Tolerance"] < 1)
+		processing_tray.mutation_controller["Light Tolerance"] = 1
+	if (processing_tray.mutation_controller["Weed Tolerance"] < 1)
+		processing_tray.mutation_controller["Weed Tolerance"] = 1
+	if (processing_tray.mutation_controller["Toxin Tolerance"] < 1)
+		processing_tray.mutation_controller["Toxin Tolerance"] = 1
+
 /datum/chem_property/positive/pneumopeutic
 	name = PROPERTY_PNEUMOPEUTIC
 	code = "PNP"
@@ -340,6 +360,20 @@
 
 /datum/chem_property/positive/pneumopeutic/process_critical(mob/living/M, potency = 1)
 	M.apply_damage(POTENCY_MULTIPLIER_VHIGH*potency, OXY)
+
+//Applies mutation enable onto hydrotray plants, enables plant life, yield, grow times and repeat harvest mutation
+/datum/chem_property/positive/pneumopeutic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	if (processing_tray.mutation_controller["Endurance"] < 1)
+		processing_tray.mutation_controller["Endurance"] = 1
+	if (processing_tray.mutation_controller["Production"] < 1)
+		processing_tray.mutation_controller["Production"] = 1
+	if (processing_tray.mutation_controller["Lifespan"] < 1)
+		processing_tray.mutation_controller["Lifespan"] = 1
+	if (processing_tray.mutation_controller["Maturity"] < 1)
+		processing_tray.mutation_controller["Maturity"] = 1
 
 /datum/chem_property/positive/oculopeutic
 	name = PROPERTY_OCULOPEUTIC
@@ -361,6 +395,18 @@
 /datum/chem_property/positive/oculopeutic/process_critical(mob/living/M, potency = 1)
 	M.apply_damages(potency, potency, POTENCY_MULTIPLIER_HIGH * potency)
 	M.apply_damage(potency, BRAIN)
+
+//Applies mutation enable onto hydrotray plants, enables potency, glowing or flowers mutations
+/datum/chem_property/positive/oculopeutic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	if (processing_tray.mutation_controller["Potency"] < 1)
+		processing_tray.mutation_controller["Potency"] = 1
+	if(processing_tray.mutation_controller["Bioluminecence"] < 1)
+		processing_tray.mutation_controller["Bioluminecence"] = 1
+	if (processing_tray.mutation_controller["Flowers"] < 1)
+		processing_tray.mutation_controller["Flowers"] = 1
 
 /datum/chem_property/positive/cardiopeutic
 	name = PROPERTY_CARDIOPEUTIC
@@ -388,6 +434,18 @@
 
 	M.pain.apply_pain(PROPERTY_CARDIOPEUTIC_PAIN_CRITICAL)
 
+//Applies mutation cancel onto hydrotray plants, enables new chems from being added
+/datum/chem_property/positive/cardiopeutic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	if (processing_tray.mutation_controller["New Chems"] < 1)
+		processing_tray.mutation_controller["New Chems"] = 1
+	if(processing_tray.mutation_controller["New Chems2"] < 1)
+		processing_tray.mutation_controller["New Chems2"] = 1
+	if (processing_tray.mutation_controller["New Chems3"] < 1)
+		processing_tray.mutation_controller["New Chems3"] = 1
+
 /datum/chem_property/positive/neuropeutic
 	name = PROPERTY_NEUROPEUTIC
 	code = "NRP"
@@ -403,6 +461,14 @@
 /datum/chem_property/positive/neuropeutic/process_critical(mob/living/M, potency = 1)
 	M.apply_damage(POTENCY_MULTIPLIER_HIGH * potency, BRAIN)
 	M.adjust_effect(potency, STUN)
+
+//Applies mutation enable onto hydrotray plants, enables species mutation
+/datum/chem_property/positive/neuropeutic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	if (processing_tray.mutation_controller["Mutate Species"] < 1)
+		processing_tray.mutation_controller["Mutate Species"] = 1
 
 /datum/chem_property/positive/bonemending
 	name = PROPERTY_BONEMENDING
