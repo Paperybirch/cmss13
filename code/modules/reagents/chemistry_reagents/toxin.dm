@@ -147,32 +147,46 @@
 	description = "Industrial grade inorganic plant fertilizer."
 	reagent_state = LIQUID
 	color = "#664330" // rgb: 102, 67, 48
-	properties = list(PROPERTY_BIOCIDIC = 0.5)
 
 /datum/reagent/toxin/fertilizer/eznutrient
 	name = "EZ Nutrient"
+	description = "A fertilizer that is proficient in every aspect by a mild amount."
 	id = "eznutrient"
+	properties = list(PROPERTY_TOXIC = 0.5)
 
-///ez nutrilevel for plants
 /datum/reagent/toxin/fertilizer/eznutrient/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
 	. = ..()
+	if(!processing_tray.seed)
+		return
+	processing_tray.plant_health += 0.05*volume
+	processing_tray.yield_mod += 0.01*volume
 	processing_tray.nutrilevel += 1*volume
 
 /datum/reagent/toxin/fertilizer/left4zed
 	name = "Left-4-Zed"
+	description = "A fertilizer that sacrifices most of nutrients in its contents to boost health and to prolong the life expectancy"
 	id = "left4zed"
 
-///Mutation mod and nutrilevel for plants
 /datum/reagent/toxin/fertilizer/left4zed/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
 	. = ..()
-	processing_tray.nutrilevel += 1*volume
-	processing_tray.mutation_mod += 0.2*volume
+	if(!processing_tray.seed)
+		return
+	processing_tray.seed.lifespan += 0.2*volume
+	processing_tray.plant_health += 0.1*volume
+	processing_tray.nutrilevel += 0.25*volume
 
-///Gives Robust harvest yield amping as it used too and, fluffing property to scan
 /datum/reagent/toxin/fertilizer/robustharvest
 	name = "Robust Harvest"
+	description = "A fertilizer that sacrifices most of nutrients in its contents to boost product yield the plant gives at the cost of plant health."
 	id = "robustharvest"
-	properties = list(PROPERTY_FLUFFING = 1)
+
+/datum/reagent/toxin/fertilizer/robustharvest/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	processing_tray.plant_health -= 0.01*volume
+	processing_tray.yield_mod += 0.1*volume
+	processing_tray.nutrilevel += 0.5*volume
 
 /datum/reagent/toxin/dinitroaniline
 	name = "Dinitroaniline"
@@ -180,21 +194,33 @@
 	description = "Dinitroanilines are a class of chemical compounds used industrially in the production of pesticides and herbicides."
 	chemclass = CHEM_CLASS_UNCOMMON
 
-///Lowers weeds n pests increases toxins
-/datum/reagent/toxin/dinitroaniline/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
+//Industrial Grade Weedkiller
+/datum/reagent/toxin/fertilizer/dinitroaniline/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
 	. = ..()
-	processing_tray.pestlevel += -3*volume
-	processing_tray.weedlevel += -6*volume
+	if(processing_tray.weedlevel > 0)
+		processing_tray.weedlevel += -6*volume
+	if(processing_tray.pestlevel > 0)
+		processing_tray.pestlevel += -3*volume
 	processing_tray.toxins += 2*volume
 
-///PLant B Gone toxic damage and lowers weeds in plants
+///PLant B Gone toxic damage and lowers weeds+Pest in plants
 /datum/reagent/toxin/plantbgone
 	name = "Plant-B-Gone"
 	id = "plantbgone"
 	description = "A harmful toxic mixture used to kill plantlife. Very toxic to animals."
 	reagent_state = LIQUID
 	color = "#49002E" // rgb: 73, 0, 46
-	properties = list(PROPERTY_TOXIC = 2, PROPERTY_CORROSIVE = 4)
+	properties = list(PROPERTY_TOXIC = 4)
+
+/datum/reagent/toxin/plantbgone/reaction_hydro_tray_reagent(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, volume)
+	. = ..()
+	if(!processing_tray.seed)
+		return
+	processing_tray.plant_health -= 4*volume
+	if(processing_tray.weedlevel > 0)
+		processing_tray.weedlevel += -8*volume
+	if(processing_tray.pestlevel > 0)
+		processing_tray.pestlevel += -4*volume
 
 /datum/reagent/toxin/stoxin
 	name = "Soporific"

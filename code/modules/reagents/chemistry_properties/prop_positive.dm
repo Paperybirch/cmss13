@@ -6,7 +6,7 @@
 /datum/chem_property/positive/antitoxic
 	name = PROPERTY_ANTITOXIC
 	code = "ATX"
-	description = "Absorbs and neutralizes toxic chemicals in the bloodstream and allowing them to be excreted safely."
+	description = "Absorbs and neutralizes toxic chemicals in the bloodstream and xylem sap, allowing them to be excreted safely."
 	rarity = PROPERTY_COMMON
 	starter = TRUE
 	value = 1
@@ -31,7 +31,7 @@
 /datum/chem_property/positive/anticorrosive
 	name = PROPERTY_ANTICORROSIVE
 	code = "ACR"
-	description = "Accelerates cell division around corroded areas in order to replace the lost tissue. Excessive use can trigger apoptosis."
+	description = "Accelerates cell division around corroded areas in order to replace the lost tissue. Plant damage rapidly healed. Excessive use can trigger apoptosis."
 	rarity = PROPERTY_COMMON
 	starter = TRUE
 	value = 1
@@ -52,7 +52,7 @@
 	if(!processing_tray.seed)
 		return
 	if(processing_tray.toxins > 0)
-		processing_tray.toxins += -1*(potency*2)
+		processing_tray.plant_health += 0.75*(potency*2)
 
 /datum/chem_property/positive/neogenetic
 	name = PROPERTY_NEOGENETIC
@@ -114,7 +114,7 @@
 /datum/chem_property/positive/hemogenic
 	name = PROPERTY_HEMOGENIC
 	code = "HMG"
-	description = "Increases the production of erythrocytes (red blood cells) in the bonemarrow, leading to polycythemia, an elevated volume of erythrocytes in the blood."
+	description = "Increases the production of erythrocytes (red blood cells) in the bonemarrow, leading to polycythemia, an elevated volume of erythrocytes in the blood. In plants produces small growths, ideal for seed clipping"
 	rarity = PROPERTY_COMMON
 
 /datum/chem_property/positive/hemogenic/process(mob/living/M, potency = 1, delta_time)
@@ -145,12 +145,12 @@
 	. = ..()
 	if(!processing_tray.seed)
 		return
-	if(processing_tray.sampled > 0)
+	if(processing_tray.sampled == 0)
 		return
-	if(rand(1,10) < 6)
+	if(prob(60))
 		processing_tray.sampled = 0
 		var/turf/c_turf = get_turf(processing_tray)
-		c_turf.visible_message(SPAN_NOTICE("\The [processing_tray.seed.display_name] Graft scar has healed!"))
+		c_turf.visible_message(SPAN_NOTICE("[processing_tray.seed.display_name]'s graft scar has healed!"))
 
 
 /datum/chem_property/positive/hemogenic/predator
@@ -282,7 +282,7 @@
 /datum/chem_property/positive/hepatopeutic
 	name = PROPERTY_HEPATOPEUTIC
 	code = "HPP"
-	description = "Treats deteriorated hepatocytes and damaged tissues in the liver, restoring organ functions."
+	description = "Treats deteriorated hepatocytes and damaged tissues in the liver, restoring organ functions. Forces some negative mutations in plants."
 	rarity = PROPERTY_UNCOMMON
 	value = 1
 
@@ -312,7 +312,7 @@
 /datum/chem_property/positive/nephropeutic
 	name = PROPERTY_NEPHROPEUTIC
 	code = "NPP"
-	description = "Heals damaged and deteriorated podocytes in the kidney, restoring organ functions."
+	description = "Heals damaged and deteriorated podocytes in the kidney, restoring organ functions. Forces mutation of the tolerance to light, weeds, and toxins in plants."
 	rarity = PROPERTY_UNCOMMON
 	value = 1
 
@@ -344,7 +344,7 @@
 /datum/chem_property/positive/pneumopeutic
 	name = PROPERTY_PNEUMOPEUTIC
 	code = "PNP"
-	description = "Mends the interstitium tissue of the alveoli restoring respiratory functions in the lungs."
+	description = "Mends the interstitium tissue of the alveoli restoring respiratory functions in the lungs. Forces mutation of growth speed and health in plants."
 	rarity = PROPERTY_UNCOMMON
 	value = 1
 
@@ -378,7 +378,7 @@
 /datum/chem_property/positive/oculopeutic
 	name = PROPERTY_OCULOPEUTIC
 	code = "OCP"
-	description = "Restores sensory capabilities of photoreceptive cells in the eyes returning lost vision."
+	description = "Restores sensory capabilities of photoreceptive cells in the eyes returning lost vision. Forces mutation of potency in plants."
 	rarity = PROPERTY_COMMON
 	value = 1
 
@@ -411,7 +411,7 @@
 /datum/chem_property/positive/cardiopeutic
 	name = PROPERTY_CARDIOPEUTIC
 	code = "CDP"
-	description = "Regenerates damaged cardiomyocytes and recovers a correct cardiac cycle and heart functionality."
+	description = "Regenerates damaged cardiomyocytes and recovers a correct cardiac cycle and heart functionality. Prevents forces mutation of produced chemicals in plants."
 	rarity = PROPERTY_UNCOMMON
 	value = 1
 
@@ -449,7 +449,7 @@
 /datum/chem_property/positive/neuropeutic
 	name = PROPERTY_NEUROPEUTIC
 	code = "NRP"
-	description = "Rebuilds damaged and broken neurons in the central nervous system re-establishing brain functionality."
+	description = "Rebuilds damaged and broken neurons in the central nervous system re-establishing brain functionality. Forces species mutation in plants."
 	rarity = PROPERTY_COMMON
 
 /datum/chem_property/positive/neuropeutic/process(mob/living/M, potency = 1)
@@ -933,7 +933,7 @@
 /datum/chem_property/positive/photosensitive
 	name = PROPERTY_PHOTOSENSITIVE
 	code = "PTS"
-	description = "Reacts with any amount of light. Can be useful to create light-sensitive objects. Not safe to administer."
+	description = "Reacts with any amount of light. Can be useful to create light-sensitive objects. Not safe to administer. Supercharges photosynthesis, treated plants able to be harvested repeatedly "
 	rarity = PROPERTY_UNCOMMON
 	category = PROPERTY_TYPE_TOXICANT
 	max_level = 1
@@ -942,7 +942,6 @@
 	to_chat(M, SPAN_WARNING("Your feel a horrible migraine!"))
 	M.apply_internal_damage(potency, "brain")
 
-//Makes plant repeat harvest, potency is limited to .5
 /datum/chem_property/positive/photosensitive/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
 	. = ..()
 	if(!processing_tray.seed)
@@ -965,7 +964,7 @@
 /datum/chem_property/positive/crystallization
 	name = PROPERTY_CRYSTALLIZATION
 	code = "CRL"
-	description = "The chemical structure of the chemical forms itself in a lens. passing light wider, while also keeping focus. Not safe to administer"
+	description = "The chemical structure of the chemical forms itself in a lens. passing light wider, while also keeping focus. Not safe to administer. Hardens root structure of plants, improving survivability during repeat harvests."
 	rarity = PROPERTY_UNCOMMON
 	category = PROPERTY_TYPE_TOXICANT
 	max_level = 1
@@ -975,7 +974,6 @@
 	M.take_limb_damage(brute = 0.5 * potency)
 	M.apply_internal_damage(potency, "liver")
 
-//Makes plant repeat harvest, potency is limited to .5
 /datum/chem_property/positive/crystallization/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
 	. = ..()
 	if(!processing_tray.seed)
@@ -1099,7 +1097,7 @@
 /datum/chem_property/positive/aiding
 	name = PROPERTY_AIDING
 	code = "AID"
-	description = "Fixes genetic defects, disfigurments and disabilities."
+	description = "Fixes genetic defects, disfigurments, disabilities. In plants removes compounds modfying yield and mutation."
 	rarity = PROPERTY_DISABLED
 	category = PROPERTY_TYPE_MEDICINE
 	value = 1

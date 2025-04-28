@@ -342,7 +342,7 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 				return
 			allowed_mutations += list(c)
 
-	for(var/i = 0;i<total_mutations;i++)
+	for(var/i in 0 to total_mutations+max(0, round(processing_tray.mutation_level/50)))
 		var/mut_number = allowed_mutations[rand(1,length(allowed_mutations))]
 		//Low level mutation cancels any mutation
 		if(mut_number < 0)
@@ -680,13 +680,16 @@ GLOBAL_LIST_EMPTY(gene_tag_masks)   // Gene obfuscation for delicious trial and 
 	new_seed.roundstart = 0
 
 	//Copy over everything else.
-	if(products)    new_seed.products = products.Copy()
+	if(products)
+		new_seed.products = products.Copy()
 	if(mutants)
 		new_seed.mutants = mutants.Copy()
-	if(chems)   new_seed.chems = chems.Copy()
+	if(chems)
+		new_seed.chems = chems.Copy()
 	if(consume_gasses)
 		new_seed.consume_gasses = consume_gasses.Copy()
-	if(exude_gasses)   new_seed.exude_gasses = exude_gasses.Copy()
+	if(exude_gasses)
+		new_seed.exude_gasses = exude_gasses.Copy()
 
 	new_seed.seed_name = "[(roundstart ? "[(modified ? "modified" : "mutant")] " : "")][seed_name]"
 	new_seed.display_name =  "[(roundstart ? "[(modified ? "modified" : "mutant")] " : "")][display_name]"

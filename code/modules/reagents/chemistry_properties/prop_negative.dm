@@ -34,7 +34,7 @@
 /datum/chem_property/negative/toxic
 	name = PROPERTY_TOXIC
 	code = "TXC"
-	description = "Poisonous substance which causes harm on contact with or through absorption by organic tissues, resulting in bad health or severe illness."
+	description = "Poisonous substance which causes harm on contact with or through absorption by organic tissues, resulting in bad health, severe illness, or plant death."
 	rarity = PROPERTY_COMMON
 	starter = TRUE
 	value = -1
@@ -60,20 +60,6 @@
 	if(istype(O,/obj/effect/plantsegment))
 		if(prob(50))
 			qdel(O)
-		return
-	if(istype(O,/obj/structure/machinery/portable_atmospherics/hydroponics))
-		var/obj/structure/machinery/portable_atmospherics/hydroponics/tray = O
-
-		if(!tray.seed)
-			return
-		tray.health -= rand(30,50)
-		if(tray.pestlevel > 0)
-			tray.pestlevel -= 2
-		if(tray.weedlevel > 0)
-			tray.weedlevel -= 3
-		tray.toxins += 4
-		tray.check_level_sanity()
-		tray.update_icon()
 
 /datum/chem_property/negative/toxic/reaction_mob(mob/living/M, method=TOUCH, volume, potency = 1)
 	if(!iscarbon(M))
@@ -93,7 +79,7 @@
 /datum/chem_property/negative/corrosive
 	name = PROPERTY_CORROSIVE
 	code = "CRS"
-	description = "Damages or destroys other substances on contact through a chemical reaction. Causes chemical burns on contact with living tissue."
+	description = "Damages or destroys other substances on contact through a chemical reaction. Causes chemical burns on contact with living tissue. Reduces pest and weed populations."
 	rarity = PROPERTY_COMMON
 	starter = TRUE
 	value = 1 //has a combat use
@@ -180,13 +166,15 @@
 		return
 	if(processing_tray.weedlevel > 0)
 		processing_tray.weedlevel += -1*(potency*2)*volume
-		processing_tray.plant_health += -0.1*(potency*2)*volume
+	if(processing_tray.pestlevel > 0)
+		processing_tray.pestlevel += -1*(potency*2)*volume
+
 
 
 /datum/chem_property/negative/biocidic
 	name = PROPERTY_BIOCIDIC
 	code = "BCD"
-	description = "Ruptures cell membranes on contact, destroying most types of organic tissue."
+	description = "Ruptures cell membranes on contact, destroying most types of organic tissue. Reduces pest and weed populations."
 	rarity = PROPERTY_COMMON
 	starter = TRUE
 	value = -1
@@ -205,14 +193,15 @@
 	. = ..()
 	if(!processing_tray.seed)
 		return
+	if(processing_tray.weedlevel > 0)
+		processing_tray.weedlevel += -1*(potency*2)*volume
 	if(processing_tray.pestlevel > 0)
 		processing_tray.pestlevel += -1*(potency*2)*volume
-		processing_tray.plant_health += -0.1*(potency*2)*volume
 
 /datum/chem_property/negative/paining
 	name = PROPERTY_PAINING
 	code = "PNG"
-	description = "Activates the somatosensory system causing neuropathic pain all over the body. Unlike nociceptive pain, this is not caused to any tissue damage and is solely perceptive."
+	description = "Activates the somatosensory system causing neuropathic pain all over the body. Unlike nociceptive pain, this is not caused to any tissue damage and is solely perceptive. Reduces Pest and weed populations"
 	rarity = PROPERTY_UNCOMMON
 	category = PROPERTY_TYPE_STIMULANT
 	value = -1
@@ -268,7 +257,7 @@
 /datum/chem_property/negative/hemorrhaging
 	name = PROPERTY_HEMORRAGING
 	code = "HMR"
-	description = "Ruptures endothelial cells making up bloodvessels, causing blood to escape from the circulatory system."
+	description = "Ruptures endothelial cells making up bloodvessels, causing blood to escape from the circulatory system. Persistant mutagen to plants."
 	rarity = PROPERTY_UNCOMMON
 	value = 2
 	cost_penalty = FALSE
@@ -313,14 +302,14 @@
 	. = ..()
 	if(!processing_tray.seed)
 		return
-	processing_tray.plant_health += -1*(potency*2)*volume
+	processing_tray.plant_health += -0.1*(potency*2)*volume
 	processing_tray.mutation_mod+= 0.2*(potency*2)*volume
 
 
 /datum/chem_property/negative/carcinogenic
 	name = PROPERTY_CARCINOGENIC
 	code = "CRG"
-	description = "Penetrates the cell nucleus causing direct damage to the deoxyribonucleic acid in cells resulting in cancer and abnormal cell proliferation. In extreme cases causing hyperactive apoptosis and potentially atrophy."
+	description = "Penetrates the cell nucleus causing direct damage to the deoxyribonucleic acid in cells resulting in cancer, abnormal cell proliferation, and mutation in plants. In extreme cases causing hyperactive apoptosis, potentially atrophy."
 	rarity = PROPERTY_COMMON
 
 /datum/chem_property/negative/carcinogenic/process(mob/living/M, potency = 1, delta_time)
@@ -344,7 +333,7 @@
 /datum/chem_property/negative/hepatotoxic
 	name = PROPERTY_HEPATOTOXIC
 	code = "HPT"
-	description = "Damages hepatocytes in the liver, resulting in liver deterioration and eventually liver failure."
+	description = "Damages hepatocytes in the liver, resulting in liver deterioration and eventually liver failure. Prevents some negative mutations in plants."
 	rarity = PROPERTY_UNCOMMON
 
 /datum/chem_property/negative/hepatotoxic/process(mob/living/M, potency = 1, delta_time)
@@ -388,7 +377,7 @@
 /datum/chem_property/negative/nephrotoxic
 	name = PROPERTY_NEPHROTOXIC
 	code = "NPT"
-	description = "Causes deterioration and damage to podocytes in the kidney resulting in potential kidney failure."
+	description = "Causes deterioration and damage to podocytes in the kidney resulting in potential kidney failure. Prevents the tolerance to light, weeds, and toxins from mutating in plants."
 	rarity = PROPERTY_UNCOMMON
 
 /datum/chem_property/negative/nephrotoxic/process(mob/living/M, potency = 1, delta_time)
@@ -418,7 +407,7 @@
 /datum/chem_property/negative/pneumotoxic
 	name = PROPERTY_PNEUMOTOXIC
 	code = "PNT"
-	description = "Toxic substance which causes damage to connective tissue that forms the support structure (the interstitium) of the alveoli in the lungs."
+	description = "Toxic substance which causes damage to connective tissue that forms the support structure (the interstitium) of the alveoli in the lungs. Prevents growth speed and health from mutation in plants."
 	rarity = PROPERTY_UNCOMMON
 
 /datum/chem_property/negative/pneumotoxic/process(mob/living/M, potency = 1, delta_time)
@@ -451,7 +440,7 @@
 /datum/chem_property/negative/oculotoxic
 	name = PROPERTY_OCULOTOXIC
 	code = "OCT"
-	description = "Damages the photoreceptive cells in the eyes impairing neural transmissions to the brain, resulting in loss of sight or blindness."
+	description = "Damages the photoreceptive cells in the eyes impairing neural transmissions to the brain, resulting in loss of sight or blindness. Prevents potency from mutation in plants."
 	rarity = PROPERTY_UNCOMMON
 
 /datum/chem_property/negative/oculotoxic/process(mob/living/M, potency = 1, delta_time)
@@ -484,7 +473,7 @@
 /datum/chem_property/negative/cardiotoxic
 	name = PROPERTY_CARDIOTOXIC
 	code = "CDT"
-	description = "Attacks cardiomyocytes when passing through the heart in the bloodstream. This disrupts the cardiac cycle and can lead to cardiac arrest."
+	description = "Attacks cardiomyocytes when passing through the heart in the bloodstream. This disrupts the cardiac cycle and can lead to cardiac arrest. Prevents produced chemicals from mutation in plants."
 	rarity = PROPERTY_COMMON
 
 /datum/chem_property/negative/cardiotoxic/process(mob/living/M, potency = 1, delta_time)
@@ -514,7 +503,7 @@
 /datum/chem_property/negative/neurotoxic
 	name = PROPERTY_NEUROTOXIC
 	code = "NRT"
-	description = "Breaks down neurons causing widespread damage to the central nervous system and brain functions. Exposure may cause disorientation or unconsciousness to affected persons."
+	description = "Breaks down neurons causing widespread damage to the central nervous system and brain functions. Exposure may cause disorientation or unconsciousness to affected persons. Prevents species mutation in plants."
 	rarity = PROPERTY_COMMON
 	category = PROPERTY_TYPE_TOXICANT|PROPERTY_TYPE_STIMULANT
 	cost_penalty = FALSE
@@ -554,7 +543,7 @@
 /datum/chem_property/negative/hypermetabolic
 	name = PROPERTY_HYPERMETABOLIC
 	code = "EMB"
-	description = "Takes less time for this chemical to metabolize, resulting in it being in the bloodstream for less time per unit."
+	description = "Takes less time for this chemical to metabolize, resulting in it being in the bloodstream for less time per unit. Accelerates plant growth."
 	rarity = PROPERTY_UNCOMMON
 	category = PROPERTY_TYPE_METABOLITE
 
@@ -566,12 +555,13 @@
 	holder.custom_metabolism = holder.custom_metabolism * (1 + POTENCY_MULTIPLIER_VLOW * level)
 	..()
 
-///Rate of 10 ticks per level decreases time between plant cycles
 /datum/chem_property/negative/hypermetabolic/reaction_hydro_tray(obj/structure/machinery/portable_atmospherics/hydroponics/processing_tray, potency, volume)
 	. = ..()
 	if(!processing_tray.seed)
 		return
-	processing_tray.metabolism_adjust = -20*potency
+	processing_tray.metabolism_adjust += clamp(-20*potency, 0, -130)
+
+
 
 /datum/chem_property/negative/addictive
 	name = PROPERTY_ADDICTIVE

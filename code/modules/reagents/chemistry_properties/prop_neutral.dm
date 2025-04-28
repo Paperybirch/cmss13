@@ -35,7 +35,7 @@
 /datum/chem_property/neutral/excreting
 	name = PROPERTY_EXCRETING
 	code = "EXT"
-	description = "Excretes all chemicals contained in the blood stream by using the kidneys to turn it into urine."
+	description = "Excretes all chemicals contained in the blood stream by using the kidneys to turn it into urine. Upregulates chemical production in plants."
 	rarity = PROPERTY_UNCOMMON
 	category = PROPERTY_TYPE_IRRITANT
 
@@ -362,7 +362,7 @@
 /datum/chem_property/neutral/fluffing
 	name = PROPERTY_FLUFFING
 	code = "FLF"
-	description = "Accelerates cell division in the hair follicles resulting in random and excessive hairgrowth."
+	description = "Accelerates cell division in the hair follicles resulting in random and excessive hairgrowth. Found to increase yeilds in plants."
 	rarity = PROPERTY_UNCOMMON
 	category = PROPERTY_TYPE_IRRITANT
 	value = 0
@@ -521,7 +521,7 @@
 /datum/chem_property/neutral/hypometabolic
 	name = PROPERTY_HYPOMETABOLIC
 	code = "OMB"
-	description = "Takes longer for this chemical to metabolize, resulting in it being in the bloodstream for more time per unit."
+	description = "Takes longer for this chemical to metabolize, resulting in it being in the bloodstream for more time per unit. Slows down metabolism of plants."
 	rarity = PROPERTY_UNCOMMON
 	category = PROPERTY_TYPE_METABOLITE
 	value = 2
@@ -539,7 +539,7 @@
 	. = ..()
 	if(!processing_tray.seed)
 		return
-	processing_tray.metabolism_adjust = 20*potency
+	processing_tray.metabolism_adjust += clamp(20*potency, 0, 130)
 
 /datum/chem_property/neutral/sedative
 	name = PROPERTY_SEDATIVE
